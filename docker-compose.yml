@@ -1,0 +1,141 @@
+services:
+  # 1. PostgreSQL Database Service
+  db:
+    image: postgres:15-alpine
+    container_name: college-connect-db
+    restart: always
+    environment:
+      POSTGRES_USER: admin
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: CollegeEvents
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U admin -d CollegeEvents"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # 2. Redis Service
+  redis:
+    image: redis:7-alpine
+    container_name: college-connect-redis
+    restart: always
+    ports:
+      - "6381:6379"
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # 3. MongoDB Replica Set - Node 1
+  mongo1:
+    image: mongo:7 
+    container_name: mongo1
+    command: ["mongod", "--replSet", "rs0", "--bind_ip_all"]
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo_data1:/data/db
+    healthcheck:
+      test: ["CMD", "mongosh", "--eval", "db.adminCommand('ping')"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # 4. MongoDB Replica Set - Node 2
+  mongo2:
+    image: mongo:7 
+    container_name: mongo2
+    command: ["mongod", "--replSet", "rs0", "--bind_ip_all"]
+    ports:
+      - "27018:27017"
+    volumes:
+      - mongo_data2:/data/db
+    healthcheck: 
+      test: ["CMD", "mongosh", "--eval", "db.adminCommand('ping')"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # 5. MongoDB Replica Set - Node 3
+  mongo3:
+    image: mongo:7 
+    container_name: mongo3
+    command: ["mongod", "--replSet", "rs0", "--bind_ip_all"]
+    ports:
+      - "27019:27017"
+    volumes:
+      - mongo_data3:/data/db
+    healthcheck: 
+      test: ["CMD", "mongosh", "--eval", "db.adminCommand('ping')"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # 6. Mongo Replica Set Initializer
+  mongo-setup:
+    image: mongo:7
+    container_name: mongo-setup
+    restart: "no" # It's a one-time job
+    
+    depends_on:
+      mongo1:
+        condition: service_healthy
+      mongo2:
+        condition: service_healthy
+      mongo3:
+        condition: service_healthy
+    volumes:
+      - ./init-mongo.js:/scripts/init-mongo.js
+    entrypoint: ["mongosh", "--host", "mongo1:27017", "/scripts/init-mongo.js"]
+
+  # 7. Backend API Service (Node.js)
+  backend:
+    build:
+      context: ./backend
+    container_name: college-connect-api
+    restart: unless-stopped
+    ports:
+      - "5001:5000" 
+    volumes:
+      - ./backend:/usr/src/app
+      - /usr/src/app/node_modules
+    env_file:
+      - ./backend/.env
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      mongo-setup:
+        condition: service_completed_successfully
+
+  # 8. Frontend Client Service
+  frontend:
+    build:
+      context: ./campus-events
+    container_name: college-connect-client
+    restart: always
+    ports:
+      - "5173:5173"
+    volumes:
+      - ./campus-events:/usr/src/app
+      - /usr/src/app/node_modules
+    env_file:
+      - ./campus-events/.env
+    depends_on:
+      - backend
+
+# Named volumes
+volumes:
+  postgres_data:
+  redis_data:
+  mongo_data1:
+  mongo_data2:
+  mongo_data3:

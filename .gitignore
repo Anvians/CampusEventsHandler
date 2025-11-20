@@ -1,0 +1,15 @@
+docker-learning/
+docker-compose.override.yml
+.env
+.env.local
+.env.*.local
+GenerateJWT_SECRET.js
+next_steps.md
+node_modules/
+npm-debug.log
+.DS_Store
+.vscode/
+.idea/
+dist/
+build/
+feature.md

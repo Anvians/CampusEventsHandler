@@ -1,0 +1,339 @@
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// --- Enums ---
+
+enum Role {
+  ADMIN
+  ORGANIZER
+  STUDENT
+}
+
+enum PaymentStatus {
+  PENDING
+  SUCCESS
+  FAILED
+}
+
+enum Visibility {
+  PUBLIC
+  DEPARTMENT
+  EVENT
+  CLUB_MEMBERS
+}
+
+enum NotificationType {
+  NEW_LIKE
+  NEW_COMMENT
+  NEW_FOLLOWER
+  EVENT_ANNOUNCEMENT
+  REGISTRATION_CONFIRMED
+  NEW_RESULT
+  EVENT_REMINDER
+  CLUB_ANNOUNCEMENT
+}
+
+// --- Main Models ---
+
+model User {
+  id        Int      @id @default(autoincrement())
+  name      String
+  email     String   @unique
+  password  String
+  role      Role     @default(STUDENT)
+  department String
+  year      Int?
+  profile_photo String?
+  bio       String?
+  verified  Boolean  @default(false)
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+
+  // Relationships for Clubs
+  organized_clubs Club[]       @relation("ClubOrganizers") 
+  club_memberships ClubMember[] 
+
+  // Relationships for Events
+  created_events Event[]        @relation("UserCreatedEvents") 
+  registrations  Registration[]
+  team_memberships TeamMember[]
+
+  // Relationships for Results
+  won_results       Result[] @relation("WinnerResults")
+  runner_up_results Result[] @relation("RunnerUpResults")
+
+  // Relationships for Social Features
+  posts     Post[]
+  likes     Like[]
+  comments  Comment[]
+  following Follow[] @relation("Following") 
+  followers Follow[] @relation("Followers") 
+
+  // Relationships for System Features
+  announcements    Announcement[] 
+  notifications    Notification[] @relation("UserNotifications") 
+  sent_notifications Notification[] @relation("OriginatorNotifications") 
+
+  @@index([email])
+}
+
+model Club {
+  id            Int      @id @default(autoincrement())
+  name          String   @unique
+  description   String?
+  club_logo_url String?
+  created_at    DateTime @default(now())
+  updated_at    DateTime @updatedAt
+
+  // Relation to the Organizer (User)
+  organizer_id Int
+  organizer    User   @relation("ClubOrganizers", fields: [organizer_id], references: [id])
+
+  // Relation to Club Members
+  members ClubMember[]
+
+  // Relation to Events
+  events Event[]
+
+  @@index([organizer_id])
+}
+
+model ClubMember {
+  id      Int      @id @default(autoincrement())
+  joined_at DateTime @default(now())
+
+  // Composite key for uniqueness
+  user_id Int
+  club_id Int
+  user    User @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  club    Club @relation(fields: [club_id], references: [id], onDelete: Cascade)
+
+  @@unique([user_id, club_id])
+  @@index([user_id])
+  @@index([club_id])
+}
+
+model Event {
+  id                 Int      @id @default(autoincrement())
+  title              String
+  description        String?
+  category           String?
+  event_datetime     DateTime 
+  venue              String?
+  banner_url         String?
+  registration_limit Int?     @default(0)
+  price              Int      @default(0)
+  is_active          Boolean  @default(true)
+  is_team_event      Boolean  @default(false)
+  min_team_size      Int?
+  max_team_size      Int?
+  created_at         DateTime @default(now())
+  updated_at         DateTime @updatedAt
+
+  // Relation to the Creator (User)
+  created_by_id Int
+  creator       User @relation("UserCreatedEvents", fields: [created_by_id], references: [id])
+
+  // Relation to the hosting Club
+  club_id Int
+  club    Club @relation(fields: [club_id], references: [id])
+
+  // Event child models
+  registrations Registration[]
+  teams         Team[]
+  results       Result[]
+  announcements Announcement[]
+  posts         Post[] 
+
+  @@index([created_by_id])
+  @@index([club_id])
+}
+
+model Registration {
+  id             Int           @id @default(autoincrement())
+  payment_status PaymentStatus @default(PENDING)
+  payment_id     String? // e.g: Stripe Payment Intent ID
+  created_at     DateTime      @default(now())
+
+  // Event and User relations
+  event_id Int
+  event    Event @relation(fields: [event_id], references: [id])
+
+  // A registration can be for an individual OR a team
+  individual_user_id Int?
+  individual_user    User? @relation(fields: [individual_user_id], references: [id])
+
+  team_id Int?  @unique // A team can only register once
+  team    Team? @relation(fields: [team_id], references: [id])
+
+  @@index([event_id])
+  @@index([individual_user_id])
+  @@index([team_id])
+}
+
+model Team {
+  id     Int    @id @default(autoincrement())
+  name   String
+  
+  event_id Int
+  event    Event @relation(fields: [event_id], references: [id])
+
+  members      TeamMember[]
+  registration Registration? // The single registration for this team
+
+  @@index([event_id])
+}
+
+model TeamMember {
+  id        Int     @id @default(autoincrement())
+  is_leader Boolean @default(false)
+
+  // Composite key for uniqueness
+  user_id Int
+  team_id Int
+  user    User @relation(fields: [user_id], references: [id])
+  team    Team @relation(fields: [team_id], references: [id], onDelete: Cascade)
+
+  @@unique([user_id, team_id]) // A user can only be on one team per event
+  @@index([user_id])
+  @@index([team_id])
+}
+
+model Result {
+  id                Int      @id @default(autoincrement())
+  certification_url String?
+  created_at        DateTime @default(now())
+
+  event_id Int   @unique // One result per event
+  event    Event @relation(fields: [event_id], references: [id])
+
+  // Relations for winners
+  winner_id Int
+  winner    User @relation("WinnerResults", fields: [winner_id], references: [id])
+
+  runner_up_id Int
+  runner_up    User @relation("RunnerUpResults", fields: [runner_up_id], references: [id])
+
+  @@index([event_id])
+  @@index([winner_id])
+  @@index([runner_up_id])
+}
+
+model Announcement {
+  id         Int      @id @default(autoincrement())
+  title      String
+  message    String
+  created_at DateTime @default(now())
+
+  // Relation to the Event
+  event_id Int
+  event    Event @relation(fields: [event_id], references: [id], onDelete: Cascade)
+
+  // Relation to the Creator (User)
+  created_by_id Int
+  creator       User @relation(fields: [created_by_id], references: [id])
+
+  @@index([event_id])
+  @@index([created_by_id])
+}
+
+// --- Social Models ---
+
+model Post {
+  id         Int        @id @default(autoincrement())
+  caption    String?
+  image_url  String
+  image_public_id String?
+  visibility Visibility @default(PUBLIC)
+  created_at DateTime   @default(now())
+  updated_at DateTime   @updatedAt
+
+  // Relation to the author (User)
+  user_id Int
+  user    User @relation(fields: [user_id], references: [id], onDelete: Cascade)
+
+  event_id Int?
+  event    Event? @relation(fields: [event_id], references: [id], onUpdate: NoAction, onDelete: SetNull)
+
+  likes    Like[]
+  comments Comment[]
+
+  @@index([user_id])
+  @@index([event_id])
+}
+
+model Like {
+  id      Int      @id @default(autoincrement())
+  created_at DateTime @default(now())
+
+  post_id Int
+  user_id Int
+  post    Post @relation(fields: [post_id], references: [id], onDelete: Cascade)
+  user    User @relation(fields: [user_id], references: [id], onDelete: Cascade)
+
+  @@unique([post_id, user_id])
+  @@index([post_id])
+  @@index([user_id])
+}
+
+model Comment {
+  id         Int      @id @default(autoincrement())
+  comment    String
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+
+  // Relations
+  post_id Int
+  user_id Int
+  post    Post @relation(fields: [post_id], references: [id], onDelete: Cascade)
+  user    User @relation(fields: [user_id], references: [id], onDelete: Cascade)
+
+  @@index([post_id])
+  @@index([user_id])
+}
+
+model Follow {
+  id           Int      @id @default(autoincrement())
+  created_at   DateTime @default(now())
+
+  follower_id  Int
+  following_id Int
+  
+  // Relations
+  follower  User @relation("Following", fields: [follower_id], references: [id], onDelete: Cascade)
+  following User @relation("Followers", fields: [following_id], references: [id], onDelete: Cascade)
+
+  @@unique([follower_id, following_id])
+  @@index([follower_id])
+  @@index([following_id])
+}
+
+// --- System Models ---
+
+model Notification {
+  id         Int              @id @default(autoincrement())
+  type       NotificationType
+  message    String
+  link       String           // e.g., /posts/123 or /events/456
+  is_read    Boolean          @default(false)
+  created_at DateTime         @default(now())
+
+  // Relation to the User receiving the notification
+  receiver_id Int
+  receiver    User @relation("UserNotifications", fields: [receiver_id], references: [id], onDelete: Cascade)
+
+  // Relation to the User who triggered the notification 
+  originator_id Int?
+  originator    User? @relation("OriginatorNotifications", fields: [originator_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+
+  @@index([receiver_id])
+  @@index([originator_id])
+}
+

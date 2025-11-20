@@ -1,0 +1,28 @@
+# Node modules (will be installed inside the container)
+node_modules
+npm-debug.log
+yarn-error.log
+pnpm-lock.yaml
+
+# Logs and temp files
+logs
+*.log
+*.tmp
+*.swp
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Git files
+.git
+.gitignore
+
+# .env
+
+dist
+build
+coverage
+
+# Prisma client can be regenerated in container
+node_modules/@prisma/client

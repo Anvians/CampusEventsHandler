@@ -1,0 +1,31 @@
+# Use Debian-based Node image (better Prisma support)
+FROM node:20-slim
+
+#  Install dependencies Prisma needs (OpenSSL, wget for healthcheck)
+RUN apt-get update && apt-get install -y openssl wget && rm -rf /var/lib/apt/lists/*
+
+# Set working directory
+WORKDIR /usr/src/app
+
+#  Copy package files first (for caching)
+COPY package*.json ./
+
+#  Avoid dependency conflicts (multer/cloudinary etc.)
+RUN npm install --legacy-peer-deps
+
+#  Copy Prisma schema and generate Prisma Client
+COPY prisma ./prisma
+RUN npx prisma generate
+
+#  Copy remaining source code AFTER dependencies
+COPY . .
+
+# Expose backend port
+EXPOSE 5000
+
+#  Healthcheck optional
+HEALTHCHECK --interval=30s --timeout=10s --retries=3 \
+  CMD wget --no-verbose --tries=1 --spider http://localhost:5000/api/health || exit 1
+
+#  Use dev command for live reload 
+CMD ["npm", "start"]
