@@ -6,7 +6,8 @@
   "type": "module",
   "scripts": {
     "start": "node index.js",
-    "dev": "nodemon index.js"
+    "dev": "nodemon index.js",
+    "build": "npm install && npx prisma generate"
   },
   "prisma": {
     "seed": "node prisma/seed.js"
@@ -21,6 +22,7 @@
     "express": "^4.18.0",
     "express-rate-limit": "^7.5.1",
     "helmet": "^7.0.0",
+    "ioredis": "^5.8.2",
     "joi": "^17.9.0",
     "jsonwebtoken": "^9.0.0",
     "mongoose": "^8.19.3",
