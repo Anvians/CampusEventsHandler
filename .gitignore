@@ -4,7 +4,7 @@ docker-compose.override.yml
 .env.local
 .env.*.local
 GenerateJWT_SECRET.js
-next_steps.md
+next_step.md
 node_modules/
 npm-debug.log
 .DS_Store
