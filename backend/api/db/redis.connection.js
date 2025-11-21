@@ -3,27 +3,45 @@ import dotenv from 'dotenv';
 
 dotenv.config();
 
-const redisUrl = process.env.REDIS_URL || 'redis://localhost:6379';
+const redisUrl = process.env.REDIS_URL;
 
-// Detect if we are using a secure connection (Render uses rediss://)
-const isProduction = redisUrl.startsWith('rediss://');
+if (!redisUrl) {
+  console.error(' REDIS_URL is missing from environment variables');
 
-const redisClient = createClient({
-  url: redisUrl,
-  socket: {
-    tls: isProduction,
-    // Critical for Render/Heroku: accept self-signed certs
-    rejectUnauthorized: false, 
-  },
-});
+}
+
+const getRedisConfig = () => {
+  if (redisUrl && redisUrl.startsWith('rediss://')) {
+    console.log(' Configuring Redis with SSL (Production Mode)');
+    return {
+      url: redisUrl,
+      socket: {
+        tls: true,
+        rejectUnauthorized: false, 
+      },
+    };
+  }
+
+
+  console.log('Configuring Redis without SSL (Internal/Local Mode)');
+  return {
+    url: redisUrl || 'redis://localhost:6379',
+  };
+};
+
+const redisClient = createClient(getRedisConfig());
 
 redisClient.on('error', (err) => {
-  // Don't crash the app if Redis blips, just log it
-  console.error('Redis Client Error:', err.message);
+  // Filter out the "Socket closed" noise to keep logs clean
+  if (err.message.includes('Socket closed unexpectedly')) {
+    console.error(' Redis connection dropped, retrying...');
+  } else {
+    console.error(' Redis Client Error:', err.message);
+  }
 });
 
 redisClient.on('connect', () => {
-  console.log('Connected to Redis');
+  console.log(' Connected to Redis');
 });
 
 export default redisClient;

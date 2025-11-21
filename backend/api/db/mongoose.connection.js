@@ -4,7 +4,7 @@ import mongoose from 'mongoose';
 let isConnected = false; 
 
 const connectMongo = async () => {
-  const mongoURL = process.env.MONGO_URL
+  const mongoURL = process.env.MONGO_URL;
 
   if (!mongoURL) {
     console.error(' MONGO_URL not found in environment variables');
