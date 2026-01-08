@@ -4,11 +4,11 @@
   "description": "Backend for College Connect App",
   "main": "index.js",
   "type": "module",
-  "scripts": {
+   "scripts": {
     "start": "node index.js",
     "dev": "nodemon index.js",
-    "build": "npm install && npx prisma generate"
-  },
+    "build": "npx prisma generate"
+  }
   "prisma": {
     "seed": "node prisma/seed.js"
   },
