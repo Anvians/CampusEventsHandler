@@ -4,7 +4,7 @@ College Connect is a full-stack web application designed to be the central hub f
 
 This project is built with a modern, scalable backend using Node.js, Express, and Prisma and a dynamic, component-based frontend using React.
 
-## ✨ Core Features
+##  Core Features
 
 
 **1. Authentication & Role Management**
@@ -76,7 +76,7 @@ This project is built with a modern, scalable backend using Node.js, Express, an
 
     * **My Profile (`/profile`):** A private page for users to see their own info, with tabs for their posts, joined clubs, and registered events.
 
-    * **Public Profile (`/profile/:id`):** A public page to view other users' profiles, their public posts, and their clu`bs.
+    * **Public Profile (`/profile/:id`):** A public page to view other users' profiles, their public posts, and their clubs.
 
     * **Follow/Unfollow:** Users can follow and unfollow other users.
 
@@ -100,7 +100,7 @@ This project is built with a modern, scalable backend using Node.js, Express, an
 
     * **Event Results (Winner/Runner-up)**
 
-## 🛠 Tech Stack
+##  Tech Stack
 
 | **Area** | **Technology** |
 |-----------|----------------|
@@ -116,7 +116,7 @@ This project is built with a modern, scalable backend using Node.js, Express, an
 | **Real-Time** | **Socket.io** |
 
 
-## 🚀 Setup & Installation
+##  Setup & Installation
 
 To run this project locally, you will need to set up both the backend server and the frontend client.
 
@@ -131,7 +131,7 @@ To run this project locally, you will need to set up both the backend server and
 
 3. **Create your `.env` file:**
 
-    * Copy the `.env.example` file to  new file named `.env`.
+    * Copy the `.env.example` file to a  new file named `.env`.
 
     * Fill in all the required variables:
 
@@ -182,10 +182,10 @@ The backend server will be running on `http://localhost:5000`.
 
 4. Open the app in your browser at `http://localhost:5173` and start using it!
 
-# 🗺 API Endpoints
-## 🧠 API Endpoints
+#  API Endpoints
+##  API Endpoints
 
-### 🔐 **Auth**
+###  **Auth**
 
 | **Method** | **Endpoint** | **Access** | **Description** |
 |-------------|--------------|-------------|------------------|
@@ -197,7 +197,7 @@ The backend server will be running on `http://localhost:5000`.
 
 ---
 
-### 👑 **Admin**
+###  **Admin**
 
 | **Method** | **Endpoint** | **Access** | **Description** |
 |-------------|--------------|-------------|------------------|
@@ -206,7 +206,7 @@ The backend server will be running on `http://localhost:5000`.
 
 ---
 
-### 👤 **Users & Profiles**
+###  **Users & Profiles**
 
 | **Method** | **Endpoint** | **Access** | **Description** |
 |-------------|--------------|-------------|------------------|
@@ -217,7 +217,7 @@ The backend server will be running on `http://localhost:5000`.
 
 ---
 
-### 🔔 **Notifications**
+###  **Notifications**
 
 | **Method** | **Endpoint** | **Access** | **Description** |
 |-------------|--------------|-------------|------------------|
@@ -226,7 +226,7 @@ The backend server will be running on `http://localhost:5000`.
 
 ---
 
-### 🎯 **Clubs**
+###  **Clubs**
 
 | **Method** | **Endpoint** | **Access** | **Description** |
 |-------------|--------------|-------------|------------------|
@@ -239,7 +239,7 @@ The backend server will be running on `http://localhost:5000`.
 
 ---
 
-### 🎉 **Events**
+###  **Events**
 
 | **Method** | **Endpoint** | **Access** | **Description** |
 |-------------|--------------|-------------|------------------|
@@ -253,7 +253,7 @@ The backend server will be running on `http://localhost:5000`.
 | `POST` | `/events/:id/results` | Org/Admin | Post the results for an event. |
 
 
-### 📝 **Posts (Social)**
+###  **Posts (Social)**
 
 | **Method** | **Endpoint** | **Access** | **Description** |
 |-------------|--------------|-------------|------------------|
@@ -264,7 +264,7 @@ The backend server will be running on `http://localhost:5000`.
 | `POST` | `/posts/:id/comment` | Private | Add a comment to a post. |
 
 
-### ⚙️ Additional Backend Infrastructure
+###  Additional Backend Infrastructure
 
 **Rate Limiting**
 - Implemented using `express-rate-limit`.
@@ -282,7 +282,7 @@ The backend server will be running on `http://localhost:5000`.
 - Ensures real-time operations are fast and reliable.
 
 
-## 🛣 Future Enhancements
+##  Future Enhancements
 
 * **Payment Integration:** Use Stripe or Razorpay to handle payments for paid events.
 
@@ -294,7 +294,7 @@ The backend server will be running on `http://localhost:5000`.
 * **CSS Refactor:** Convert all inline styles to CSS Modules or a CSS-in-JS library for better maintainability.
 
 * **Dark Mode:** Implement a site-wide dark mode toggle.
-* **Messagin Feature** There will be a messaging app inside this app
+* **Messaging Feature** There will be a messaging app inside this app
 
 
 
