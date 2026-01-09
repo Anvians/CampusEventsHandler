@@ -6,6 +6,7 @@ import ErrorMessage from './common/ErrorMessage.jsx';
 import { useAuth } from './context/AuthContext.jsx'; 
 
 const ClubCard = ({ club }) => {
+  console.log('Club', club)
   const placeholderImage = `https://placehold.co/100x100/e0e7ff/4338ca?text=${encodeURIComponent(
     club.name.charAt(0)
   )}&font=inter`;
