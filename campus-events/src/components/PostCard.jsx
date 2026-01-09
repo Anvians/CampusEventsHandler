@@ -36,27 +36,27 @@ const CommentIcon = (props) => (
 
 export default function PostCard({ post, onPostUpdate }) {
   const navigate = useNavigate();
-  
+
   const [isLiked, setIsLiked] = useState(post.isLiked || false);
   const [likeCount, setLikeCount] = useState(post.likes_count || 0);
-  const [commentCount, setCommentCount] = useState(post.comments_count || 0);
+  const [commentCount] = useState(post.comments_count || 0);
 
   const handleLikeToggle = async () => {
     const originalLikeState = isLiked;
     const originalLikeCount = likeCount;
-    
+
     setIsLiked(!isLiked);
     setLikeCount(likeCount + (!isLiked ? 1 : -1));
 
     try {
       await api.post(`/api/posts/${post.id}/like`);
-      
+
       if (onPostUpdate) {
         onPostUpdate({
           ...post,
           isLiked: !isLiked,
           likes_count: likeCount + (!isLiked ? 1 : -1),
-          comments_count: commentCount, 
+          comments_count: commentCount,
         });
       }
     } catch (err) {
@@ -65,37 +65,43 @@ export default function PostCard({ post, onPostUpdate }) {
       setLikeCount(originalLikeCount);
     }
   };
-  
+
   const handleCommentClick = () => {
     navigate(`/post/${post.id}`);
   };
 
-
   const placeholderName = post.user?.name || 'U';
-  const userAvatarPlaceholder = `https://placehold.co/50x50/e0e7ff/4338ca?text=${encodeURIComponent(placeholderName.charAt(0))}&font=inter`;
+  const userAvatarPlaceholder = `https://placehold.co/50x50/e0e7ff/4338ca?text=${encodeURIComponent(
+    placeholderName.charAt(0)
+  )}&font=inter`;
 
   return (
-    <div style={styles.card}>
-      <div style={styles.header}>
+    <div className="bg-white rounded-2xl shadow-md overflow-hidden font-inter">
+      {/* Header */}
+      <div className="flex items-center p-3">
         <img
           src={post.user?.profile_photo || userAvatarPlaceholder}
           alt={post.user?.name || 'Unknown User'}
-          style={styles.avatar}
-          onError={(e) => { e.target.src = userAvatarPlaceholder; }}
+          className="w-10 h-10 rounded-full object-cover mr-3"
+          onError={(e) => (e.target.src = userAvatarPlaceholder)}
         />
         <div>
-          
           {post.user && post.user.id ? (
-            <Link to={`/profile/${post.user.id}`} style={styles.userName}>
+            <Link
+              to={`/profile/${post.user.id}`}
+              className="text-gray-900 font-semibold text-sm"
+            >
               {post.user.name}
             </Link>
           ) : (
-            <span style={styles.userName}>{post.user?.name || 'Unknown User'}</span>
+            <span className="text-gray-900 font-semibold text-sm">
+              {post.user?.name || 'Unknown User'}
+            </span>
           )}
-          
-          <p style={styles.postDate}>
+          <p className="text-gray-400 text-xs">
             {new Date(post.created_at).toLocaleDateString('en-US', {
-              month: 'long', day: 'numeric'
+              month: 'long',
+              day: 'numeric',
             })}
           </p>
         </div>
@@ -105,124 +111,51 @@ export default function PostCard({ post, onPostUpdate }) {
       <img
         src={post.image_url}
         alt={post.caption || 'Post image'}
-        style={styles.postImage}
+        className="w-full max-h-[700px] object-cover border-t border-b border-gray-100"
       />
 
       {/* Post Content */}
-      <div style={styles.content}>
-        {/* Like & Comment Buttons */}
-        <div style={styles.actions}>
-          <button onClick={handleLikeToggle} style={styles.iconButton}>
+      <div className="p-3">
+        {/* Actions */}
+        <div className="flex gap-3 mb-2">
+          <button onClick={handleLikeToggle} className="p-1">
             <HeartIcon isLiked={isLiked} />
           </button>
-          <button onClick={handleCommentClick} style={styles.iconButton}>
+          <button onClick={handleCommentClick} className="p-1">
             <CommentIcon />
           </button>
         </div>
 
         {/* Like Count */}
-        <p style={styles.likeCount}>
+        <p className="text-gray-900 font-semibold text-sm mb-1">
           {likeCount} {likeCount === 1 ? 'like' : 'likes'}
         </p>
 
         {/* Caption */}
-        <p style={styles.caption}>
-          
+        <p className="text-gray-900 text-sm leading-5 mb-1">
           {post.user && post.user.id ? (
-            <Link to={`/profile/${post.user.id}`} style={styles.captionUser}>
+            <Link
+              to={`/profile/${post.user.id}`}
+              className="font-semibold text-gray-900 mr-1"
+            >
               {post.user.name}
             </Link>
           ) : (
-            <span style={styles.captionUser}>{post.user?.name || 'Unknown User'}</span>
+            <span className="font-semibold text-gray-900 mr-1">
+              {post.user?.name || 'Unknown User'}
+            </span>
           )}
-          
-          {' '}
           {post.caption}
         </p>
-        
+
         {/* Comment Count */}
-        <Link to={`/post/${post.id}`} style={styles.commentLink}>
-          View all {post.comments_count} comments
+        <Link
+          to={`/post/${post.id}`}
+          className="text-gray-400 text-sm block mt-1"
+        >
+          View all {commentCount} comments
         </Link>
       </div>
     </div>
   );
 }
-
-// --- STYLES ---
-const styles = {
-  card: {
-    backgroundColor: '#ffffff',
-    borderRadius: '16px',
-    boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.07), 0 4px 6px -2px rgba(0, 0, 0, 0.05)',
-    overflow: 'hidden',
-    fontFamily: 'Inter, system-ui, sans-serif',
-  },
-  header: {
-    display: 'flex',
-    alignItems: 'center',
-    padding: '12px 16px',
-  },
-  avatar: {
-    width: '40px',
-    height: '40px',
-    borderRadius: '50%',
-    objectFit: 'cover',
-    marginRight: '12px',
-  },
-  userName: {
-    fontSize: '15px',
-    fontWeight: '600',
-    color: '#1a202c',
-    textDecoration: 'none',
-  },
-  postDate: {
-    fontSize: '12px',
-    color: '#718096',
-    margin: 0,
-  },
-  postImage: {
-    width: '100%',
-    maxHeight: '700px',
-    objectFit: 'cover',
-    borderTop: '1px solid #f3f4f6',
-    borderBottom: '1px solid #f3f4f6',
-  },
-  content: {
-    padding: '12px 16px',
-  },
-  actions: {
-    display: 'flex',
-    gap: '12px',
-  },
-  iconButton: {
-    background: 'none',
-    border: 'none',
-    padding: '4px',
-    cursor: 'pointer',
-  },
-  likeCount: {
-    fontSize: '14px',
-    fontWeight: '600',
-    color: '#1a202c',
-    margin: '8px 0',
-  },
-  caption: {
-    fontSize: '14px',
-    color: '#1a202c',
-    margin: 0,
-    lineHeight: 1.5,
-  },
-  captionUser: {
-    fontWeight: '600',
-    color: 'inherit',
-    textDecoration: 'none',
-  },
-  commentLink: {
-    fontSize: '14px',
-    color: '#718096',
-    textDecoration: 'none',
-    display: 'block',
-    marginTop: '6px',
-  },
-};

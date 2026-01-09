@@ -13,13 +13,11 @@ export default function CreatePost() {
   
   const [events, setEvents] = useState([]);
   const [loadingEvents, setLoadingEvents] = useState(false);
-  
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState('');
   
   const navigate = useNavigate();
 
-  // Fetch all events to link to the post
   useEffect(() => {
     const fetchEvents = async () => {
       setLoadingEvents(true);
@@ -35,7 +33,6 @@ export default function CreatePost() {
     fetchEvents();
   }, []);
 
-  // Handle image selection and create preview
   const handleImageChange = (e) => {
     const file = e.target.files[0];
     if (file) {
@@ -50,7 +47,6 @@ export default function CreatePost() {
       setError('An image is required to create a post.');
       return;
     }
-    
     setIsSubmitting(true);
     setError('');
 
@@ -58,20 +54,13 @@ export default function CreatePost() {
     formData.append('image', image); 
     formData.append('caption', caption);
     formData.append('visibility', visibility);
-    if (event_id) {
-      formData.append('event_id', event_id);
-    }
+    if (event_id) formData.append('event_id', event_id);
 
     try {
       await api.post('/api/posts', formData, {
-        headers: {
-          'Content-Type': 'multipart/form-data',
-        },
+        headers: { 'Content-Type': 'multipart/form-data' },
       });
-      
-      // Success! Navigate to the feed
       navigate('/feed');
-
     } catch (err) {
       setError(err.response?.data?.message || 'Failed to create post.');
     } finally {
@@ -80,47 +69,53 @@ export default function CreatePost() {
   };
 
   return (
-    <div style={styles.container}>
-      <form style={styles.form} onSubmit={handleSubmit}>
-        <h1 style={styles.title}>Create New Post</h1>
+    <div className="max-w-2xl mx-auto mt-12 p-8 bg-white rounded-2xl shadow-lg font-inter">
+      <h1 className="text-2xl font-bold text-gray-900 text-center mb-6">Create New Post</h1>
+      <form className="flex flex-col gap-6" onSubmit={handleSubmit}>
         
-        {/* Image Upload & Preview */}
-        <div style={styles.field}>
-          <label htmlFor="image" style={styles.label}>Upload Image (Required)</label>
+        {/* Image Upload */}
+        <div>
+          <label htmlFor="image" className="block text-sm font-semibold text-gray-600 mb-2">
+            Upload Image (Required)
+          </label>
           <input
             type="file"
-            name="image"
-            id="image"
             accept="image/png, image/jpeg, image/gif"
             required
-            style={styles.input}
+            className="w-full px-4 py-3 border border-gray-300 rounded-lg bg-gray-50 focus:outline-none focus:ring-2 focus:ring-indigo-400"
             onChange={handleImageChange}
           />
           {imagePreview && (
-            <img src={imagePreview} alt="Preview" style={styles.imagePreview} />
+            <img
+              src={imagePreview}
+              alt="Preview"
+              className="w-full max-h-96 object-cover rounded-lg mt-4 border border-gray-200"
+            />
           )}
         </div>
 
-        <div style={styles.field}>
-          <label htmlFor="caption" style={styles.label}>Caption</label>
+        {/* Caption */}
+        <div>
+          <label htmlFor="caption" className="block text-sm font-semibold text-gray-600 mb-2">
+            Caption
+          </label>
           <textarea
-            name="caption"
-            id="caption"
             rows="4"
-            style={styles.textarea}
+            placeholder="Write something about your post..."
+            className="w-full px-4 py-3 border border-gray-300 rounded-lg bg-gray-50 focus:outline-none focus:ring-2 focus:ring-indigo-400 resize-vertical"
             value={caption}
             onChange={(e) => setCaption(e.target.value)}
-            placeholder="Write something about your post..."
           />
         </div>
 
-        <div style={styles.inputGroup}>
-          <div style={styles.flexField}>
-            <label htmlFor="visibility" style={styles.label}>Visibility</label>
+        {/* Visibility & Event Link */}
+        <div className="flex flex-wrap gap-6">
+          <div className="flex-1 min-w-[200px]">
+            <label htmlFor="visibility" className="block text-sm font-semibold text-gray-600 mb-2">
+              Visibility
+            </label>
             <select
-              name="visibility"
-              id="visibility"
-              style={styles.input}
+              className="w-full px-4 py-3 border border-gray-300 rounded-lg bg-gray-50 focus:outline-none focus:ring-2 focus:ring-indigo-400"
               value={visibility}
               onChange={(e) => setVisibility(e.target.value)}
             >
@@ -129,13 +124,13 @@ export default function CreatePost() {
               <option value="EVENT">Linked Event Only</option>
             </select>
           </div>
-          
-          <div style={styles.flexField}>
-            <label htmlFor="event_id" style={styles.label}>Link to Event (Optional)</label>
+
+          <div className="flex-1 min-w-[200px]">
+            <label htmlFor="event_id" className="block text-sm font-semibold text-gray-600 mb-2">
+              Link to Event (Optional)
+            </label>
             <select
-              name="event_id"
-              id="event_id"
-              style={styles.input}
+              className="w-full px-4 py-3 border border-gray-300 rounded-lg bg-gray-50 focus:outline-none focus:ring-2 focus:ring-indigo-400"
               value={event_id}
               onChange={(e) => setEventId(e.target.value)}
               disabled={loadingEvents}
@@ -149,97 +144,14 @@ export default function CreatePost() {
         </div>
 
         {error && <ErrorMessage message={error} />}
-        <button type="submit" style={styles.button} disabled={isSubmitting}>
+        <button
+          type="submit"
+          disabled={isSubmitting}
+          className="mt-4 px-6 py-3 bg-indigo-600 text-white font-bold rounded-xl hover:bg-indigo-700 transition-colors disabled:opacity-50"
+        >
           {isSubmitting ? 'Posting...' : 'Create Post'}
         </button>
       </form>
     </div>
   );
 }
-
-// --- STYLES ---
-const styles = {
-  container: {
-    maxWidth: '700px',
-    margin: '32px auto',
-    padding: '40px',
-    backgroundColor: '#ffffff',
-    borderRadius: '16px',
-    boxShadow: '0 10px 25px rgba(0, 0, 0, 0.1)',
-    fontFamily: 'Inter, system-ui, sans-serif',
-  },
-  title: {
-    fontSize: '28px',
-    fontWeight: '700',
-    color: '#1a202c',
-    marginBottom: '24px',
-    textAlign: 'center',
-  },
-  form: {
-    display: 'flex',
-    flexDirection: 'column',
-    gap: '20px',
-  },
-  field: {
-    width: '100%',
-  },
-  label: {
-    display: 'block',
-    fontSize: '14px',
-    fontWeight: '600',
-    color: '#4a5568',
-    marginBottom: '6px',
-  },
-  input: {
-    width: '100%',
-    padding: '12px 15px',
-    border: '1px solid #d1d5db',
-    borderRadius: '8px',
-    backgroundColor: '#f9fafb',
-    fontSize: '16px',
-    color: '#2d3748',
-    boxSizing: 'border-box',
-  },
-  textarea: {
-    width: '100%',
-    padding: '12px 15px',
-    border: '1px solid #d1d5db',
-    borderRadius: '8px',
-    backgroundColor: '#f9fafb',
-    fontSize: '16px',
-    color: '#2d3748',
-    fontFamily: 'Inter, system-ui, sans-serif',
-    boxSizing: 'border-box',
-    resize: 'vertical',
-  },
-  imagePreview: {
-    width: '100%',
-    height: 'auto',
-    maxHeight: '400px',
-    objectFit: 'cover',
-    borderRadius: '8px',
-    marginTop: '16px',
-    border: '1px solid #e2e8f0',
-  },
-  inputGroup: {
-    display: 'flex',
-    flexWrap: 'wrap',
-    gap: '20px',
-  },
-  flexField: {
-    flex: 1,
-    minWidth: '250px',
-  },
-  button: {
-    padding: '14px 20px',
-    backgroundColor: '#4c51bf',
-    color: '#ffffff',
-    fontSize: '16px',
-    fontWeight: '700',
-    borderRadius: '10px',
-    border: 'none',
-    cursor: 'pointer',
-    marginTop: '10px',
-  },
-};
-

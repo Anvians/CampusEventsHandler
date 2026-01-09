@@ -10,7 +10,7 @@ export default function Profile() {
   const [profileData, setProfileData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
-  const [activeTab, setActiveTab] = useState('posts'); 
+  const [activeTab, setActiveTab] = useState('posts');
 
   useEffect(() => {
     const fetchMyProfile = async () => {
@@ -49,85 +49,69 @@ export default function Profile() {
   const placeholderAvatar = `https://placehold.co/150x150/e0e7ff/4338ca?text=${encodeURIComponent(profileData.name.charAt(0))}&font=inter`;
 
   return (
-    <div style={styles.container}>
-      {/* --- Profile Header --- */}
-      <div style={styles.header}>
+    <div className="max-w-4xl mx-auto p-6">
+      {/* Profile Header */}
+      <div className="flex flex-col md:flex-row items-center md:items-start bg-white p-8 rounded-2xl shadow-md">
         <img
           src={profileData.profile_photo || placeholderAvatar}
           alt="Profile"
-          style={styles.avatar}
+          className="w-36 h-36 rounded-full object-cover border-4 border-indigo-100 mb-4 md:mb-0 md:mr-8"
           onError={(e) => { e.target.src = placeholderAvatar; }}
         />
-        <div style={styles.headerInfo}>
-          <h1 style={styles.name}>{profileData.name}</h1>
-          <p style={styles.email}>{profileData.email}</p>
-          <p style={styles.bio}>{profileData.bio || 'No bio provided.'}</p>
-          
-          {/* --- Stats Bar --- */}
-          <div style={styles.stats}>
-            <div style={styles.statItem}>
-              <strong>{profileData._count.posts}</strong> Posts
-            </div>
+        <div className="flex-1 text-center md:text-left">
+          <h1 className="text-2xl font-bold text-gray-900">{profileData.name}</h1>
+          <p className="text-gray-500 mt-1">{profileData.email}</p>
+          <p className="text-gray-600 mt-2">{profileData.bio || 'No bio provided.'}</p>
 
-            {/* Removed the following and followers for now */}
-            {/* <div style={styles.statItem}>
-              <strong>{profileData._count.followers}</strong> Followers
+          {/* Stats */}
+          <div className="flex justify-center md:justify-start gap-8 mt-4">
+            <div className="text-gray-600 font-medium">
+              <span className="font-bold text-gray-900">{profileData._count.posts}</span> Posts
             </div>
-            <div style={styles.statItem}>
-              <strong>{profileData._count.following}</strong> Following
-            </div> */}
           </div>
-          
-          {/* --- Edit/Logout Buttons --- */}
-          <div style={styles.buttonGroup}>
-            <button style={styles.editButton}>Edit Profile</button>
-            <button onClick={logout} style={styles.logoutButton}>
-              Logout
-            </button>
+
+          {/* Buttons */}
+          <div className="flex justify-center md:justify-start gap-4 mt-4">
+            <button className="px-4 py-2 bg-indigo-100 text-indigo-700 font-semibold rounded-lg">Edit Profile</button>
+            <button onClick={logout} className="px-4 py-2 bg-red-100 text-red-600 font-semibold rounded-lg">Logout</button>
           </div>
         </div>
       </div>
 
-      {/* --- Tab Navigation --- */}
-      <div style={styles.tabs}>
-        <button
-          style={activeTab === 'posts' ? styles.tabActive : styles.tab}
-          onClick={() => setActiveTab('posts')}
-        >
-          Posts
-        </button>
-        <button
-          style={activeTab === 'clubs' ? styles.tabActive : styles.tab}
-          onClick={() => setActiveTab('clubs')}
-        >
-          My Clubs
-        </button>
-        <button
-          style={activeTab === 'events' ? styles.tabActive : styles.tab}
-          onClick={() => setActiveTab('events')}
-        >
-          My Events
-        </button>
+      {/* Tabs */}
+      <div className="flex border-b-2 border-gray-200 mt-8">
+        {['posts', 'clubs', 'events'].map(tab => (
+          <button
+            key={tab}
+            onClick={() => setActiveTab(tab)}
+            className={`px-4 py-2 font-semibold -mb-2 border-b-2 ${
+              activeTab === tab
+                ? 'border-indigo-600 text-indigo-600'
+                : 'border-transparent text-gray-500 hover:text-gray-700'
+            }`}
+          >
+            {tab === 'posts' ? 'Posts' : tab === 'clubs' ? 'My Clubs' : 'My Events'}
+          </button>
+        ))}
       </div>
 
-      {/* --- Tab Content --- */}
-      <div style={styles.tabContent}>
+      {/* Tab Content */}
+      <div className="mt-6">
         {renderTabContent()}
       </div>
     </div>
   );
 }
 
-
+// --- Profile Tab Components ---
 const ProfilePosts = ({ posts }) => {
-  if (posts.length === 0) {
-    return <p style={styles.emptyText}>No posts yet.</p>;
-  }
+  if (posts.length === 0) return <p className="text-center text-gray-500 py-10">No posts yet.</p>;
+
   return (
-    <div style={styles.grid}>
+    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
       {posts.map(post => (
-        <div key={post.id} style={styles.gridItem}>
-          <img src={post.image_url} alt={post.caption} style={styles.postImage} />
+        <div key={post.id} className="relative pb-full bg-gray-100 rounded-lg overflow-hidden">
+          <img src={post.image_url} alt={post.caption} className="absolute top-0 left-0 w-full h-full object-cover" />
         </div>
       ))}
     </div>
@@ -135,20 +119,19 @@ const ProfilePosts = ({ posts }) => {
 };
 
 const ProfileClubs = ({ clubs }) => {
-  if (clubs.length === 0) {
-    return <p style={styles.emptyText}>You haven't joined any clubs yet.</p>;
-  }
+  if (clubs.length === 0) return <p className="text-center text-gray-500 py-10">You haven't joined any clubs yet.</p>;
+
   return (
-    <div style={styles.list}>
-      {clubs.map(membership => (
-        <Link to={`/club/${membership.club.id}`} key={membership.club.id} style={styles.listItemLink}>
-          <div style={styles.listItem}>
-            <img 
-              src={membership.club.club_logo_url || `https://placehold.co/60x60?text=${membership.club.name.charAt(0)}`} 
-              alt={membership.club.name} 
-              style={styles.listImage}
+    <div className="flex flex-col gap-4">
+      {clubs.map(m => (
+        <Link to={`/club/${m.club.id}`} key={m.club.id} className="block">
+          <div className="flex items-center gap-4 p-4 bg-white rounded-lg shadow-sm hover:shadow-md transition">
+            <img
+              src={m.club.club_logo_url || `https://placehold.co/60x60?text=${m.club.name.charAt(0)}`}
+              alt={m.club.name}
+              className="w-12 h-12 rounded-full object-cover"
             />
-            <span style={styles.listTitle}>{membership.club.name}</span>
+            <span className="font-semibold text-gray-900">{m.club.name}</span>
           </div>
         </Link>
       ))}
@@ -157,194 +140,20 @@ const ProfileClubs = ({ clubs }) => {
 };
 
 const ProfileEvents = ({ events }) => {
-  if (events.length === 0) {
-    return <p style={styles.emptyText}>You are not registered for any events.</p>;
-  }
+  if (events.length === 0) return <p className="text-center text-gray-500 py-10">You are not registered for any events.</p>;
+
   return (
-    <div style={styles.list}>
+    <div className="flex flex-col gap-4">
       {events.map(reg => (
-        <Link to={`/event/${reg.event.id}`} key={reg.event.id} style={styles.listItemLink}>
-          <div style={styles.listItem}>
-            <div style={styles.listContent}>
-              <span style={styles.listTitle}>{reg.event.title}</span>
-              <span style={styles.listSubtitle}>
-                {reg.event.club.name} &bull; {new Date(reg.event.event_datetime).toLocaleDateString()}
-              </span>
-            </div>
+        <Link to={`/event/${reg.event.id}`} key={reg.event.id} className="block">
+          <div className="flex flex-col p-4 bg-white rounded-lg shadow-sm hover:shadow-md transition">
+            <span className="font-semibold text-gray-900">{reg.event.title}</span>
+            <span className="text-gray-500 text-sm mt-1">
+              {reg.event.club.name} &bull; {new Date(reg.event.event_datetime).toLocaleDateString()}
+            </span>
           </div>
         </Link>
       ))}
     </div>
   );
 };
-
-
-// --- STYLES ---
-const styles = {
-  container: {
-    maxWidth: '900px',
-    margin: '32px auto',
-    padding: '0 24px',
-    fontFamily: 'Inter, system-ui, sans-serif',
-  },
-  header: {
-    display: 'flex',
-    alignItems: 'center',
-    backgroundColor: '#ffffff',
-    padding: '32px',
-    borderRadius: '16px',
-    boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.07)',
-  },
-  avatar: {
-    width: '150px',
-    height: '150px',
-    borderRadius: '50%',
-    objectFit: 'cover',
-    marginRight: '32px',
-    border: '4px solid #eef2ff',
-  },
-  headerInfo: {
-    flex: 1,
-  },
-  name: {
-    fontSize: '28px',
-    fontWeight: '700',
-    color: '#1a202c',
-    margin: 0,
-  },
-  email: {
-    fontSize: '16px',
-    color: '#718096',
-    margin: '4px 0 12px',
-  },
-  bio: {
-    fontSize: '15px',
-    color: '#4a5568',
-    marginBottom: '16px',
-  },
-  stats: {
-    display: 'flex',
-    gap: '24px',
-    marginBottom: '16px',
-  },
-  statItem: {
-    fontSize: '15px',
-    color: '#4a5568',
-  },
-  buttonGroup: {
-    display: 'flex',
-    gap: '12px',
-  },
-  editButton: {
-    padding: '8px 16px',
-    backgroundColor: '#eef2ff',
-    color: '#4c51bf',
-    border: 'none',
-    borderRadius: '8px',
-    fontWeight: '600',
-    cursor: 'pointer',
-  },
-  logoutButton: {
-    padding: '8px 16px',
-    backgroundColor: '#fff0f0',
-    color: '#e53e3e',
-    border: 'none',
-    borderRadius: '8px',
-    fontWeight: '600',
-    cursor: 'pointer',
-  },
-  tabs: {
-    display: 'flex',
-    borderBottom: '2px solid #e2e8f0',
-    marginTop: '32px',
-  },
-  tab: {
-    padding: '12px 20px',
-    border: 'none',
-    backgroundColor: 'transparent',
-    cursor: 'pointer',
-    fontSize: '16px',
-    fontWeight: '600',
-    color: '#718096',
-    borderBottom: '2px solid transparent',
-    marginBottom: '-2px', 
-  },
-  tabActive: {
-    padding: '12px 20px',
-    border: 'none',
-    backgroundColor: 'transparent',
-    cursor: 'pointer',
-    fontSize: '16px',
-    fontWeight: '600',
-    color: '#4c51bf',
-    borderBottom: '2px solid #4c51bf',
-    marginBottom: '-2px',
-  },
-  tabContent: {
-    padding: '24px 0',
-  },
-  grid: {
-    display: 'grid',
-    gridTemplateColumns: 'repeat(3, 1fr)',
-    gap: '16px',
-  },
-  gridItem: {
-    position: 'relative',
-    paddingTop: '100%', 
-    backgroundColor: '#f3f4f6',
-    borderRadius: '8px',
-  },
-  postImage: {
-    position: 'absolute',
-    top: 0,
-    left: 0,
-    width: '100%',
-    height: '100%',
-    objectFit: 'cover',
-    borderRadius: '8px',
-  },
-  list: {
-    display: 'flex',
-    flexDirection: 'column',
-    gap: '12px',
-  },
-  listItemLink: {
-    textDecoration: 'none',
-  },
-  listItem: {
-    display: 'flex',
-    alignItems: 'center',
-    padding: '16px',
-    backgroundColor: '#ffffff',
-    borderRadius: '10px',
-    boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.05)',
-  },
-  listImage: {
-    width: '50px',
-    height: '50px',
-    borderRadius: '50%',
-    marginRight: '16px',
-    objectFit: 'cover',
-  },
-  listContent: {
-    display: 'flex',
-    flexDirection: 'column',
-  },
-  listTitle: {
-    fontSize: '16px',
-    fontWeight: '600',
-    color: '#1a202c',
-  },
-  listSubtitle: {
-    fontSize: '14px',
-    color: '#718096',
-    marginTop: '2px',
-  },
-  emptyText: {
-    textAlign: 'center',
-    fontSize: '16px',
-    color: '#718096',
-    padding: '40px 0',
-  },
-};
-

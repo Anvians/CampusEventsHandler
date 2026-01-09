@@ -6,31 +6,36 @@ import ErrorMessage from './common/ErrorMessage.jsx';
 import { useAuth } from './context/AuthContext.jsx'; 
 
 const ClubCard = ({ club }) => {
-  const placeholderImage = `https://placehold.co/100x100/e0e7ff/4338ca?text=${encodeURIComponent(club.name.charAt(0))}&font=inter`;
+  const placeholderImage = `https://placehold.co/100x100/e0e7ff/4338ca?text=${encodeURIComponent(
+    club.name.charAt(0)
+  )}&font=inter`;
 
   return (
-    <div style={styles.card}>
+    <div className="bg-white rounded-xl shadow-md flex items-center p-5 hover:shadow-lg transition-shadow">
       <img
         src={club.club_logo_url || placeholderImage}
         alt={`${club.name} logo`}
-        style={styles.logo}
+        className="w-20 h-20 rounded-full object-cover mr-5 border-3 border-indigo-100 flex-shrink-0"
         onError={(e) => { e.target.src = placeholderImage; }}
       />
-      <div style={styles.cardContent}>
-        <h3 style={styles.cardTitle}>
-          <Link to={`/club/${club.id}`} style={styles.cardLink}>
+      <div className="flex-1 min-w-0">
+        <h3 className="text-lg font-bold text-gray-900 truncate">
+          <Link to={`/club/${club.id}`} className="hover:underline">
             {club.name}
           </Link>
         </h3>
-        <p style={styles.cardOrganizer}>
+        <p className="text-sm text-gray-500 truncate mt-1">
           Organized by: {club.organizer.name}
         </p>
-        <div style={styles.cardStats}>
+        <div className="flex text-sm text-gray-600 gap-2 mt-3">
           <span>{club._count.members} Members</span>
-          <span style={{ margin: '0 4px' }}>&bull;</span>
+          <span>&bull;</span>
           <span>{club._count.events} Events</span>
         </div>
-        <Link to={`/club/${club.id}`} style={styles.cardButton}>
+        <Link
+          to={`/club/${club.id}`}
+          className="inline-block mt-3 px-3 py-1 bg-indigo-100 text-indigo-600 rounded-md font-semibold text-sm hover:bg-indigo-200 transition-colors"
+        >
           View Club
         </Link>
       </div>
@@ -72,10 +77,10 @@ export default function ClubList() {
   } else if (error) {
     content = <ErrorMessage message={error} />;
   } else if (clubs.length === 0) {
-    content = <p>No clubs found.</p>;
+    content = <p className="text-center text-gray-500">No clubs found.</p>;
   } else {
     content = (
-      <div style={styles.grid}>
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
         {clubs.map(club => (
           <ClubCard key={club.id} club={club} />
         ))}
@@ -84,11 +89,14 @@ export default function ClubList() {
   }
 
   return (
-    <div style={styles.container}>
-      <div style={styles.header}>
-        <h1 style={styles.title}>Explore Clubs</h1>
+    <div className="max-w-7xl mx-auto mt-8 px-6 font-inter">
+      <div className="flex justify-between items-center mb-6">
+        <h1 className="text-3xl font-bold text-gray-900">Explore Clubs</h1>
         {user?.role === 'ADMIN' && (
-          <button onClick={handleCreateClubClick} style={styles.createButton}>
+          <button
+            onClick={handleCreateClubClick}
+            className="px-4 py-2 bg-indigo-600 text-white rounded-lg font-semibold text-sm hover:bg-indigo-700 transition-colors"
+          >
             + Create Club
           </button>
         )}
@@ -97,104 +105,3 @@ export default function ClubList() {
     </div>
   );
 }
-
-// --- STYLES ---
-const styles = {
-  container: {
-    maxWidth: '1200px',
-    margin: '32px auto',
-    padding: '0 24px',
-    fontFamily: 'Inter, system-ui, sans-serif',
-  },
-  header: {
-    display: 'flex',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: '24px',
-  },
-  title: {
-    fontSize: '32px',
-    fontWeight: '700',
-    color: '#1a202c',
-    margin: 0, 
-  },
-  createButton: {
-    padding: '10px 16px',
-    backgroundColor: '#4c51bf',
-    color: '#ffffff',
-    borderRadius: '8px',
-    textDecoration: 'none',
-    fontWeight: '600',
-    fontSize: '15px',
-    border: 'none',
-    cursor: 'pointer',
-    transition: 'background-color 0.2s ease',
-  },
-  grid: {
-    display: 'grid',
-    gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))',
-    gap: '24px',
-  },
-  card: {
-    backgroundColor: '#ffffff',
-    borderRadius: '12px',
-    boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.07), 0 4px 6px -2px rgba(0, 0, 0, 0.05)',
-    display: 'flex',
-    alignItems: 'center',
-    padding: '20px',
-    transition: 'box-shadow 0.3s ease',
-  },
-  logo: {
-    width: '80px',
-    height: '80px',
-    borderRadius: '50%',
-    objectFit: 'cover',
-    marginRight: '20px',
-    border: '3px solid #eef2ff',
-    flexShrink: 0,
-  },
-  cardContent: {
-    flex: 1,
-    minWidth: 0, // Prevents text overflow issues in flex
-  },
-  cardTitle: {
-    fontSize: '20px',
-    fontWeight: '700',
-    color: '#1a202c',
-    margin: 0,
-    whiteSpace: 'nowrap',
-    overflow: 'hidden',
-    textOverflow: 'ellipsis',
-  },
-  cardLink: {
-    color: 'inherit',
-    textDecoration: 'none',
-  },
-  cardOrganizer: {
-    fontSize: '14px',
-    color: '#718096',
-    margin: '4px 0',
-    whiteSpace: 'nowrap',
-    overflow: 'hidden',
-    textOverflow: 'ellipsis',
-  },
-  cardStats: {
-    fontSize: '14px',
-    color: '#4a5568',
-    display: 'flex',
-    gap: '8px',
-    margin: '12px 0',
-  },
-  cardButton: {
-    display: 'inline-block',
-    padding: '8px 14px',
-    backgroundColor: '#eef2ff',
-    color: '#4c51bf',
-    borderRadius: '8px',
-    textDecoration: 'none',
-    fontWeight: '600',
-    fontSize: '14px',
-    transition: 'background-color 0.2s ease',
-  },
-};
-

@@ -1,15 +1,15 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
-import { useAuth } from '../components/context/AuthContext.jsx'; 
-import api from '../utils/api.js'; 
-import Spinner from './common/Spinner.jsx'; 
-import ErrorMessage from './common/ErrorMessage.jsx'; 
+import { useAuth } from '../components/context/AuthContext.jsx';
+import api from '../utils/api.js';
+import Spinner from './common/Spinner.jsx';
+import ErrorMessage from './common/ErrorMessage.jsx';
 
 export default function UserProfile() {
   const { id: profileId } = useParams();
   const { user: currentUser } = useAuth();
-  const navigate = useNavigate(); 
-  
+  const navigate = useNavigate();
+
   const [profileData, setProfileData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -23,7 +23,7 @@ export default function UserProfile() {
       setLoading(true);
       const response = await api.get(`/api/users/${profileId}`);
       setProfileData(response.data);
-      setIsFollowing(response.data.isFollowing); 
+      setIsFollowing(response.data.isFollowing);
     } catch (err) {
       setError(err.response?.data?.message || 'Failed to fetch profile data');
     } finally {
@@ -46,7 +46,7 @@ export default function UserProfile() {
   }, [profileId, currentUser?.id]);
 
   const handleFollowToggle = async () => {
-    if(isProcessingFollow) return;
+    if (isProcessingFollow) return;
     setIsProcessingFollow(true);
 
     const apiCall = isFollowing
@@ -55,29 +55,16 @@ export default function UserProfile() {
 
     try {
       await apiCall;
-      
       setIsFollowing(!isFollowing);
-      
-      setProfileData(prev => ({
+      setProfileData((prev) => ({
         ...prev,
         _count: {
           ...prev._count,
-          followers: prev._count.followers + (!isFollowing ? 1 : -1),
-        }
+          followers: prev._count.followers + (isFollowing ? -1 : 1),
+        },
       }));
-    } catch (err) {
-      console.error(err);
     } finally {
       setIsProcessingFollow(false);
-    }
-  };
-
-  const renderTabContent = () => {
-    if (!profileData) return null;
-    switch (activeTab) {
-      case 'posts': return <ProfilePosts posts={profileData.posts} />;
-      case 'clubs': return <ProfileClubs clubs={profileData.club_memberships} />;
-      default: return null;
     }
   };
 
@@ -85,222 +72,153 @@ export default function UserProfile() {
   if (error) return <ErrorMessage message={error} />;
   if (!profileData) return <ErrorMessage message="Could not load profile." />;
 
-  const placeholderAvatar = `https://placehold.co/150x150/e0e7ff/4338ca?text=${encodeURIComponent(profileData.name.charAt(0))}&font=inter`;
+  const placeholderAvatar = `https://placehold.co/150x150/e0e7ff/4338ca?text=${encodeURIComponent(
+    profileData.name.charAt(0)
+  )}&font=inter`;
+
   const isOwnProfile = Number(currentUser.id) === Number(profileData.id);
 
   return (
-    <div style={styles.container}>
-      <div style={styles.header}>
+    <div className="mx-auto max-w-4xl px-6 py-8">
+      {/* Header */}
+      <div className="flex items-center rounded-2xl bg-white p-8 shadow-sm">
         <img
           src={profileData.profile_photo || placeholderAvatar}
+          onError={(e) => (e.target.src = placeholderAvatar)}
           alt="Profile"
-          style={styles.avatar}
-          onError={(e) => { e.target.src = placeholderAvatar; }}
+          className="h-36 w-36 rounded-full border-4 border-indigo-100 object-cover"
         />
-        <div style={styles.headerInfo}>
-          <h1 style={styles.name}>{profileData.name}</h1>
-          <p style={styles.email}>{profileData.email}</p>
-          <p style={styles.bio}>{profileData.bio || 'No bio provided.'}</p>
-          
-          {/* Updated Stats Section */}
-          <div style={styles.stats}>
-            <div style={styles.statItem}>
+
+        <div className="ml-8 flex-1">
+          <h1 className="text-2xl font-bold text-gray-900">
+            {profileData.name}
+          </h1>
+          <p className="text-sm text-gray-500">{profileData.email}</p>
+          <p className="mt-2 text-sm text-gray-600">
+            {profileData.bio || 'No bio provided.'}
+          </p>
+
+          {/* Stats */}
+          <div className="mt-4 flex gap-6 text-sm text-gray-600">
+            <span>
               <strong>{profileData._count.posts}</strong> Posts
-            </div>
-            <div style={styles.statItem}>
+            </span>
+            <span>
               <strong>{profileData._count.followers}</strong> Followers
-            </div>
-            <div style={styles.statItem}>
+            </span>
+            <span>
               <strong>{profileData._count.following}</strong> Following
-            </div>
+            </span>
           </div>
-          
+
           {!isOwnProfile && (
-            <div style={styles.buttonGroup}>
-              <button 
-                onClick={handleFollowToggle} 
+            <div className="mt-4">
+              <button
+                onClick={handleFollowToggle}
                 disabled={isProcessingFollow}
-                style={isFollowing ? styles.unfollowButton : styles.followButton}
+                className={`rounded-lg px-5 py-2 text-sm font-semibold transition ${
+                  isFollowing
+                    ? 'border border-gray-300 bg-gray-100 text-gray-800'
+                    : 'bg-indigo-600 text-white hover:bg-indigo-700'
+                }`}
               >
-                {isProcessingFollow ? 'Processing...' : (isFollowing ? 'Unfollow' : 'Follow')}
+                {isProcessingFollow
+                  ? 'Processing...'
+                  : isFollowing
+                  ? 'Unfollow'
+                  : 'Follow'}
               </button>
             </div>
           )}
         </div>
       </div>
 
-      <div style={styles.tabs}>
-        <button style={activeTab === 'posts' ? styles.tabActive : styles.tab} onClick={() => setActiveTab('posts')}>Posts</button>
-        <button style={activeTab === 'clubs' ? styles.tabActive : styles.tab} onClick={() => setActiveTab('clubs')}>Clubs</button>
+      {/* Tabs */}
+      <div className="mt-8 flex border-b border-gray-200">
+        {['posts', 'clubs'].map((tab) => (
+          <button
+            key={tab}
+            onClick={() => setActiveTab(tab)}
+            className={`px-5 py-3 text-sm font-semibold ${
+              activeTab === tab
+                ? 'border-b-2 border-indigo-600 text-indigo-600'
+                : 'text-gray-500'
+            }`}
+          >
+            {tab.charAt(0).toUpperCase() + tab.slice(1)}
+          </button>
+        ))}
       </div>
 
-      <div style={styles.tabContent}>
-        {renderTabContent()}
+      <div className="py-6">
+        {activeTab === 'posts' && (
+          <ProfilePosts posts={profileData.posts} />
+        )}
+        {activeTab === 'clubs' && (
+          <ProfileClubs clubs={profileData.club_memberships} />
+        )}
       </div>
     </div>
   );
 }
 
+/* ---------- Sub Components ---------- */
 
+const ProfilePosts = ({ posts }) => {
+  if (posts.length === 0) {
+    return (
+      <p className="py-10 text-center text-gray-500">No posts yet.</p>
+    );
+  }
 
-const styles = {
-  container: {
-    maxWidth: '900px',
-    margin: '32px auto',
-    padding: '0 24px',
-    fontFamily: 'Inter, system-ui, sans-serif',
-  },
-  header: {
-    display: 'flex',
-    alignItems: 'center',
-    backgroundColor: '#ffffff',
-    padding: '32px',
-    borderRadius: '16px',
-    boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.07)',
-  },
-  avatar: {
-    width: '150px',
-    height: '150px',
-    borderRadius: '50%',
-    objectFit: 'cover',
-    marginRight: '32px',
-    border: '4px solid #eef2ff',
-  },
-  headerInfo: {
-    flex: 1,
-  },
-  name: {
-    fontSize: '28px',
-    fontWeight: '700',
-    color: '#1a202c',
-    margin: 0,
-  },
-  email: {
-    fontSize: '16px',
-    color: '#718096',
-    margin: '4px 0 12px',
-  },
-  bio: {
-    fontSize: '15px',
-    color: '#4a5568',
-    marginBottom: '16px',
-  },
-  stats: {
-    display: 'flex',
-    gap: '24px',
-    marginBottom: '16px',
-  },
-  statItem: {
-    fontSize: '15px',
-    color: '#4a5568',
-  },
-  buttonGroup: {
-    display: 'flex',
-    gap: '12px',
-  },
-  followButton: {
-    padding: '10px 20px',
-    backgroundColor: '#4c51bf',
-    color: '#ffffff',
-    border: 'none',
-    borderRadius: '8px',
-    fontWeight: '600',
-    cursor: 'pointer',
-    fontSize: '15px',
-  },
-  unfollowButton: {
-    padding: '10px 20px',
-    backgroundColor: '#f3f4f6',
-    color: '#1a202c',
-    border: '1px solid #d1d5db',
-    borderRadius: '8px',
-    fontWeight: '600',
-    cursor: 'pointer',
-    fontSize: '15px',
-  },
-  tabs: {
-    display: 'flex',
-    borderBottom: '2px solid #e2e8f0',
-    marginTop: '32px',
-  },
-  tab: {
-    padding: '12px 20px',
-    border: 'none',
-    backgroundColor: 'transparent',
-    cursor: 'pointer',
-    fontSize: '16px',
-    fontWeight: '600',
-    color: '#718096',
-    borderBottom: '2px solid transparent',
-    marginBottom: '-2px',
-  },
-  tabActive: {
-    padding: '12px 20px',
-    border: 'none',
-    backgroundColor: 'transparent',
-    cursor: 'pointer',
-    fontSize: '16px',
-    fontWeight: '600',
-    color: '#4c51bf',
-    borderBottom: '2px solid #4c51bf',
-    marginBottom: '-2px',
-  },
-  tabContent: {
-    padding: '24px 0',
-  },
-  grid: {
-    display: 'grid',
-    gridTemplateColumns: 'repeat(3, 1fr)',
-    gap: '16px',
-  },
-  gridItem: {
-    position: 'relative',
-    paddingTop: '100%',
-    backgroundColor: '#f3f4f6',
-    borderRadius: '8px',
-  },
-  postImage: {
-    position: 'absolute',
-    top: 0,
-    left: 0,
-    width: '100%',
-    height: '100%',
-    objectFit: 'cover',
-    borderRadius: '8px',
-  },
-  list: {
-    display: 'flex',
-    flexDirection: 'column',
-    gap: '12px',
-  },
-  listItemLink: {
-    textDecoration: 'none',
-  },
-  listItem: {
-    display: 'flex',
-    alignItems: 'center',
-    padding: '16px',
-    backgroundColor: '#ffffff',
-    borderRadius: '10px',
-    boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.05)',
-  },
-  listImage: {
-    width: '50px',
-    height: '50px',
-    borderRadius: '50%',
-    marginRight: '16px',
-    objectFit: 'cover',
-  },
-  listTitle: {
-    fontSize: '16px',
-    fontWeight: '600',
-    color: '#1a202c',
-  },
-  emptyText: {
-    textAlign: 'center',
-    fontSize: '16px',
-    color: '#718096',
-    padding: '40px 0',
-  },
+  return (
+    <div className="grid grid-cols-3 gap-4">
+      {posts.map((post) => (
+        <div
+          key={post.id}
+          className="relative aspect-square overflow-hidden rounded-lg bg-gray-100"
+        >
+          <img
+            src={post.image_url}
+            alt={post.caption}
+            className="h-full w-full object-cover"
+          />
+        </div>
+      ))}
+    </div>
+  );
 };
 
+const ProfileClubs = ({ clubs }) => {
+  if (clubs.length === 0) {
+    return (
+      <p className="py-10 text-center text-gray-500">
+        Not a member of any clubs.
+      </p>
+    );
+  }
+
+  return (
+    <div className="flex flex-col gap-3">
+      {clubs.map(({ club }) => (
+        <Link
+          to={`/club/${club.id}`}
+          key={club.id}
+          className="flex items-center rounded-xl bg-white p-4 shadow-sm hover:bg-gray-50"
+        >
+          <img
+            src={
+              club.club_logo_url ||
+              `https://placehold.co/50x50?text=${club.name.charAt(0)}`
+            }
+            alt={club.name}
+            className="mr-4 h-12 w-12 rounded-full object-cover"
+          />
+          <span className="font-semibold text-gray-800">
+            {club.name}
+          </span>
+        </Link>
+      ))}
+    </div>
+  );
+};

@@ -16,81 +16,67 @@ export default function EventCard({ event }) {
   const placeholderImage = `https://placehold.co/600x400/6366f1/white?text=${encodeURIComponent(event.title)}&font=inter`;
 
   return (
-    <div
-      style={styles.card}
-      onMouseOver={(e) => {
-        e.currentTarget.style.transform = 'scale(1.05)';
-        e.currentTarget.style.boxShadow = '0 10px 25px rgba(0, 0, 0, 0.1)';
-      }}
-      onMouseOut={(e) => {
-        e.currentTarget.style.transform = 'scale(1)';
-        e.currentTarget.style.boxShadow = styles.card.boxShadow;
-      }}
-    >
-      <Link to={`/event/${event.id}`} style={styles.linkBlock}>
+    <div className="bg-gray-100 md:m-4 m-10 rounded-xl shadow-sm hover:shadow-lg transform hover:scale-105 transition-all duration-300 overflow-hidden flex flex-col">
+      {/* Banner Image */}
+      <Link to={`/event/${event.id}`} className="block focus:outline-none focus:ring-2 focus:ring-indigo-500">
         <img
           src={event.banner_url || placeholderImage}
-          alt={`${event.title} banner`}
-          style={styles.image}
+          alt={`${event.title} event banner`}
+          className="w-full h-48 object-cover"
           onError={(e) => {
             e.target.src = placeholderImage;
           }}
         />
       </Link>
 
-      <div style={styles.content}>
+      <div className="p-5 flex-1 flex flex-col justify-between">
         {/* Category Tag */}
         {event.category && (
-          <span style={styles.categoryTag}>
-            <Tag style={styles.iconSmall} />
+          <span className="inline-flex items-center text-indigo-700 text-xs font-semibold px-3 py-1 rounded-full uppercase tracking-wider mb-3">
+            <Tag className="w-3 h-3 mr-1" />
             {event.category}
           </span>
         )}
 
-        <h3 style={styles.title}>
+        {/* Title */}
+        <h3 className="text-lg font-bold text-gray-800 truncate mb-3">
           <Link
             to={`/event/${event.id}`}
-            style={styles.titleLink}
-            onMouseOver={(e) => (e.target.style.color = '#4F46E5')}
-            onMouseOut={(e) => (e.target.style.color = '#1F2937')}
+            className="hover:text-indigo-600 focus:outline-none focus:ring-2 focus:ring-indigo-500"
           >
             {event.title}
           </Link>
         </h3>
 
-        {/* Date */}
-        <div style={styles.infoRow}>
-          <Calendar style={styles.iconMedium} />
-          <span style={styles.infoText}>{formatDate(event.event_datetime)}</span>
+        {/* Date & Venue */}
+        <div className="flex items-center text-gray-500 text-sm mb-2">
+          <Calendar className="w-4 h-4 mr-2 text-indigo-500" />
+          {formatDate(event.event_datetime)}
         </div>
-
-        {/* Venue */}
-        <div style={{ ...styles.infoRow, marginBottom: '1rem' }}>
-          <MapPin style={styles.iconMedium} />
-          <span style={styles.infoText}>{event.venue || 'Online'}</span>
+        <div className="flex items-center text-gray-500 text-sm mb-4">
+          <MapPin className="w-4 h-4 mr-2 text-indigo-500" />
+          {event.venue || 'Online'}
         </div>
 
         {/* Price & Registration */}
-        <div style={styles.footerRow}>
-          <span style={styles.price}>
-            {event.price === 0 ? 'Free' : `$${event.price}`}
+        <div className="flex justify-between items-center">
+          <span className="text-indigo-600 font-bold text-lg">
+            {event.price === 0 ? 'Free' : `$${event.price.toFixed(2)}`}
           </span>
-          <div style={styles.registrationInfo}>
-            <Users style={styles.iconMedium} />
+          <div className="flex items-center text-gray-500 text-sm gap-1">
+            <Users className="w-4 h-4 text-indigo-500" />
             <span>
-              {event._count.registrations} / {event.registration_limit}
+              {event._count?.registrations ?? 0} / {event.registration_limit ?? 'N/A'}
             </span>
           </div>
         </div>
       </div>
 
       {/* Footer Link */}
-      <div style={styles.cardFooter}>
+      <div className="bg-gray-50 px-5 py-3 border-t border-gray-100">
         <Link
           to={`/event/${event.id}`}
-          style={styles.footerLink}
-          onMouseOver={(e) => (e.target.style.color = '#3730A3')}
-          onMouseOut={(e) => (e.target.style.color = '#4F46E5')}
+          className="text-indigo-600 font-semibold text-sm hover:text-indigo-800 focus:outline-none focus:ring-2 focus:ring-indigo-500"
         >
           View Details →
         </Link>
@@ -98,101 +84,3 @@ export default function EventCard({ event }) {
     </div>
   );
 }
-
-const styles = {
-  card: {
-    backgroundColor: '#FFFFFF',
-    borderRadius: '0.75rem',
-    boxShadow: '0 4px 10px rgba(0, 0, 0, 0.05)',
-    overflow: 'hidden',
-    transition: 'transform 0.3s ease, box-shadow 0.3s ease',
-  },
-  linkBlock: {
-    display: 'block',
-  },
-  image: {
-    width: '100%',
-    height: '12rem',
-    objectFit: 'cover',
-  },
-  content: {
-    padding: '1.25rem',
-  },
-  categoryTag: {
-    display: 'inline-flex',
-    alignItems: 'center',
-    backgroundColor: '#E0E7FF',
-    color: '#4338CA',
-    fontSize: '0.75rem',
-    fontWeight: '600',
-    padding: '0.25rem 0.75rem',
-    borderRadius: '9999px',
-    textTransform: 'uppercase',
-    letterSpacing: '0.05em',
-    marginBottom: '0.75rem',
-  },
-  iconSmall: {
-    width: '0.75rem',
-    height: '0.75rem',
-    marginRight: '0.25rem',
-  },
-  title: {
-    fontSize: '1.25rem',
-    fontWeight: '700',
-    color: '#1F2937',
-    marginBottom: '0.5rem',
-    whiteSpace: 'nowrap',
-    overflow: 'hidden',
-    textOverflow: 'ellipsis',
-  },
-  titleLink: {
-    color: '#1F2937',
-    textDecoration: 'none',
-    transition: 'color 0.2s ease',
-  },
-  infoRow: {
-    display: 'flex',
-    alignItems: 'center',
-    color: '#4B5563',
-    marginBottom: '0.5rem',
-  },
-  iconMedium: {
-    width: '1rem',
-    height: '1rem',
-    marginRight: '0.5rem',
-    color: '#6366F1',
-  },
-  infoText: {
-    fontSize: '0.875rem',
-    fontWeight: '500',
-  },
-  footerRow: {
-    display: 'flex',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-  },
-  price: {
-    fontSize: '1.125rem',
-    fontWeight: '700',
-    color: '#4F46E5',
-  },
-  registrationInfo: {
-    display: 'flex',
-    alignItems: 'center',
-    fontSize: '0.875rem',
-    color: '#6B7280',
-    gap: '0.25rem',
-  },
-  cardFooter: {
-    backgroundColor: '#F9FAFB',
-    padding: '0.75rem 1.25rem',
-    borderTop: '1px solid #F3F4F6',
-  },
-  footerLink: {
-    fontSize: '0.875rem',
-    fontWeight: '600',
-    color: '#4F46E5',
-    textDecoration: 'none',
-    transition: 'color 0.2s ease',
-  },
-};

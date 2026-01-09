@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import api from "../utils/api.js";
 import { useAuth } from "../components/context/AuthContext.jsx";
 import { io } from "socket.io-client";
@@ -31,7 +31,7 @@ export default function Notifications() {
   const [error, setError] = useState("");
   const dropdownRef = useRef(null);
 
-  // Socket connection and event listeners
+  // Socket connection
   useEffect(() => {
     if (!user) return;
 
@@ -42,7 +42,7 @@ export default function Notifications() {
 
     socket.on("connect", () => {
       console.log("Connected:", socket.id);
-      socket.emit("join", user.id); 
+      socket.emit("join", user.id);
     });
 
     socket.on("notification:new", (notification) => {
@@ -54,10 +54,7 @@ export default function Notifications() {
       console.error("Connection Error:", err.message);
     });
 
-    return () => {
-      socket.disconnect();
-      console.log("Socket disconnected");
-    };
+    return () => socket.disconnect();
   }, [user]);
 
   const fetchNotifications = async () => {
@@ -65,18 +62,19 @@ export default function Notifications() {
       const response = await api.get("/api/users/notifications");
       setNotifications(response.data);
     } catch (err) {
-      setError("Failed to load notifications", err);
+      setError("Failed to load notifications");
     }
   };
 
   useEffect(() => {
     if (user) {
       fetchNotifications();
-      const interval = setInterval(fetchNotifications, 60000); 
-      return () => clearInterval(interval); 
+      const interval = setInterval(fetchNotifications, 60000);
+      return () => clearInterval(interval);
     }
   }, [user]);
 
+  // Close dropdown when clicking outside
   useEffect(() => {
     const handleClickOutside = (event) => {
       if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
@@ -87,12 +85,10 @@ export default function Notifications() {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, [dropdownRef]);
 
-  const handleToggle = () => {
-    setIsOpen(!isOpen);
-  };
+  const handleToggle = () => setIsOpen(!isOpen);
 
   const handleNotificationClick = async (notification) => {
-    setIsOpen(false); 
+    setIsOpen(false);
 
     if (!notification.is_read) {
       setNotifications((prev) =>
@@ -102,39 +98,46 @@ export default function Notifications() {
       );
     }
 
-    // Call API in background to mark as read
     try {
       if (!notification.is_read) {
-        // Only call API if it was unread
         await api.put(`/api/users/notifications/${notification.id}/read`);
       }
     } catch (err) {
       console.error("Failed to mark as read", err);
     }
 
-    //Navigate to the notification link
     navigate(notification.link);
   };
 
   const unreadCount = notifications.filter((n) => !n.is_read).length;
 
   return (
-    <div style={styles.container} ref={dropdownRef}>
-      <button onClick={handleToggle} style={styles.button}>
-        <BellIcon style={{ color: "#4a5568" }} />
-        {unreadCount > 0 && <span style={styles.badge}>{unreadCount}</span>}
+    <div className="relative font-inter" ref={dropdownRef}>
+      {/* Bell Button */}
+      <button
+        onClick={handleToggle}
+        className="relative p-2 rounded-full hover:bg-gray-100 transition-colors"
+      >
+        <BellIcon className="text-gray-600" />
+        {unreadCount > 0 && (
+          <span className="absolute top-0 right-0 w-4 h-4 text-[11px] font-semibold flex items-center justify-center rounded-full bg-red-500 text-white border-2 border-white">
+            {unreadCount}
+          </span>
+        )}
       </button>
 
+      {/* Dropdown */}
       {isOpen && (
-        <div style={styles.dropdown}>
-          <div style={styles.dropdownHeader}>
-            <h4 style={styles.dropdownTitle}>Notifications</h4>
+        <div className="absolute right-0 mt-4 w-96 bg-white rounded-xl shadow-lg border border-gray-200 z-50">
+          <div className="px-4 py-3 border-b border-gray-100">
+            <h4 className="text-gray-900 font-semibold text-sm">Notifications</h4>
           </div>
-          <div style={styles.dropdownList}>
-            {error && <div style={styles.item}>{error}</div>}
+          <div className="max-h-96 overflow-y-auto">
+            {error && <div className="px-4 py-3 text-red-500">{error}</div>}
             {notifications.length === 0 && !error && (
-              <div style={styles.item}>No new notifications.</div>
+              <div className="px-4 py-3 text-gray-500">No new notifications.</div>
             )}
+
             {notifications.map((noti, index) => {
               const name = noti.originator?.name || "Unknown";
               const avatar =
@@ -145,18 +148,20 @@ export default function Notifications() {
                 <div
                   key={noti.id || index}
                   onClick={() => handleNotificationClick(noti)}
-                  style={styles.item}
+                  className="flex gap-3 items-start px-4 py-3 cursor-pointer border-b border-gray-100 relative hover:bg-gray-50 transition-colors"
                 >
-                  {!noti.is_read && <div style={styles.unreadDot}></div>}
-
-                  <img src={avatar} alt={name} style={styles.avatar} />
-
-                  <div>
-                    <p style={styles.itemText}>{noti.message}</p>
-                    <span style={styles.itemDate}>
-                      {new Date(
-                        noti.created_at || Date.now()
-                      ).toLocaleDateString("en-us", {
+                  {!noti.is_read && (
+                    <div className="absolute left-4 top-1/2 transform -translate-y-1/2 w-2 h-2 bg-indigo-600 rounded-full"></div>
+                  )}
+                  <img
+                    src={avatar}
+                    alt={name}
+                    className="w-10 h-10 rounded-full object-cover ml-3"
+                  />
+                  <div className="flex flex-col">
+                    <p className="text-gray-900 text-sm leading-5">{noti.message}</p>
+                    <span className="text-gray-400 text-xs mt-1">
+                      {new Date(noti.created_at || Date.now()).toLocaleDateString("en-us", {
                         day: "numeric",
                         month: "short",
                         hour: "2-digit",
@@ -173,97 +178,3 @@ export default function Notifications() {
     </div>
   );
 }
-
-// --- STYLES ---
-const styles = {
-  container: {
-    position: "relative",
-    fontFamily: "Inter, system-ui, sans-serif",
-  },
-  button: {
-    position: "relative",
-    background: "none",
-    border: "none",
-    cursor: "pointer",
-    padding: "8px",
-    borderRadius: "50%",
-  },
-  badge: {
-    position: "absolute",
-    top: "0px",
-    right: "0px",
-    backgroundColor: "#ef4444",
-    color: "#ffffff",
-    borderRadius: "50%",
-    width: "18px",
-    height: "18px",
-    fontSize: "11px",
-    fontWeight: "600",
-    display: "flex",
-    alignItems: "center",
-    justifyContent: "center",
-    border: "2px solid #ffffff",
-  },
-  dropdown: {
-    position: "absolute",
-    top: "calc(100% + 15px)",
-    right: 0,
-    width: "380px",
-    backgroundColor: "#ffffff",
-    borderRadius: "12px",
-    boxShadow: "0 10px 25px rgba(0, 0, 0, 0.15)",
-    zIndex: 50,
-    border: "1px solid #e2e8f0",
-  },
-  dropdownHeader: {
-    padding: "12px 16px",
-    borderBottom: "1px solid #f3f4f6",
-  },
-  dropdownTitle: {
-    margin: 0,
-    fontSize: "16px",
-    fontWeight: "600",
-    color: "#1a202c",
-  },
-  dropdownList: {
-    maxHeight: "400px",
-    overflowY: "auto",
-  },
-  item: {
-    display: "flex",
-    gap: "12px",
-    padding: "12px 16px",
-    cursor: "pointer",
-    borderBottom: "1px solid #f3f4f6",
-    position: "relative", // For the dot
-    transition: "background-color 0.2s ease",
-  },
-  unreadDot: {
-    width: "8px",
-    height: "8px",
-    backgroundColor: "#4c51bf",
-    borderRadius: "50%",
-    position: "absolute",
-    left: "16px",
-    top: "50%",
-    transform: "translateY(-50%)",
-  },
-  avatar: {
-    width: "40px",
-    height: "40px",
-    borderRadius: "50%",
-    objectFit: "cover",
-    marginLeft: "12px",
-  },
-  itemText: {
-    margin: 0,
-    fontSize: "14px",
-    color: "#1a202c",
-    lineHeight: 1.5,
-  },
-  itemDate: {
-    fontSize: "12px",
-    color: "#718096",
-    marginTop: "2px",
-  },
-};

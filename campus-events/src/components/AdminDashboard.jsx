@@ -11,13 +11,11 @@ export default function AdminDashboard() {
   const [promoteError, setPromoteError] = useState('');
   const { user: adminUser } = useAuth(); 
 
-  // Function to fetch all users
   const fetchUsers = async () => {
     try {
       setLoading(true);
       setError('');
       const response = await api.get('/api/admin/users');
-      // Filter out the admin themselves from the list
       setUsers(response.data.filter(u => u.id !== adminUser.id));
     } catch (err) {
       setError(err.response?.data?.message || 'Failed to fetch users');
@@ -26,28 +24,18 @@ export default function AdminDashboard() {
     }
   };
 
-  // Fetch users on component mount
   useEffect(() => {
     fetchUsers();
-  }, [adminUser.id]); // Re-run if adminUser changes 
+  }, [adminUser.id]);
 
-  // Function to handle promoting a user
   const handlePromote = async (userIdToPromote) => {
     setPromoteError('');
     try {
-      const response = await api.put('/api/admin/promote', {
-        userIdToPromote: userIdToPromote,
-      });
-      
+      const response = await api.put('/api/admin/promote', { userIdToPromote });
       const updatedUser = response.data.user;
-
-      // Update the user in our state instantly
       setUsers(currentUsers =>
-        currentUsers.map(u =>
-          u.id === updatedUser.id ? updatedUser : u
-        )
+        currentUsers.map(u => (u.id === updatedUser.id ? updatedUser : u))
       );
-
     } catch (err) {
       setPromoteError(err.response?.data?.message || 'Failed to promote user');
     }
@@ -57,37 +45,45 @@ export default function AdminDashboard() {
     if (loading) return <Spinner />;
     if (error) return <ErrorMessage message={error} />;
     if (users.length === 0) {
-      return <p style={styles.infoText}>No other users found. Sign up with a new 'Student' account to promote them.</p>;
+      return (
+        <p className="text-center text-gray-500 text-base py-5">
+          No other users found. Sign up with a new 'Student' account to promote them.
+        </p>
+      );
     }
 
     return (
-      <div style={styles.tableContainer}>
-        <table style={styles.table}>
-          <thead>
+      <div className="overflow-x-auto bg-white rounded-xl shadow-lg">
+        <table className="min-w-full border-collapse">
+          <thead className="bg-gray-50">
             <tr>
-              <th style={styles.th}>Name</th>
-              <th style={styles.th}>Email</th>
-              <th style={styles.th}>Department</th>
-              <th style={styles.th}>Role</th>
-              <th style={styles.th}>Action</th>
+              <th className="px-4 py-3 text-left text-sm font-semibold text-gray-500 uppercase">Name</th>
+              <th className="px-4 py-3 text-left text-sm font-semibold text-gray-500 uppercase">Email</th>
+              <th className="px-4 py-3 text-left text-sm font-semibold text-gray-500 uppercase">Department</th>
+              <th className="px-4 py-3 text-left text-sm font-semibold text-gray-500 uppercase">Role</th>
+              <th className="px-4 py-3 text-left text-sm font-semibold text-gray-500 uppercase">Action</th>
             </tr>
           </thead>
           <tbody>
             {users.map(user => (
-              <tr key={user.id} style={styles.tr}>
-                <td style={styles.td}>{user.name}</td>
-                <td style={styles.td}>{user.email}</td>
-                <td style={styles.td}>{user.department}</td>
-                <td style={styles.td}>
-                  <span style={user.role === 'STUDENT' ? styles.roleStudent : styles.roleOrganizer}>
+              <tr key={user.id} className="border-b last:border-none">
+                <td className="px-4 py-3 text-sm text-gray-800">{user.name}</td>
+                <td className="px-4 py-3 text-sm text-gray-800">{user.email}</td>
+                <td className="px-4 py-3 text-sm text-gray-800">{user.department}</td>
+                <td className="px-4 py-3 text-sm">
+                  <span className={`px-2 py-1 rounded-md text-xs font-medium ${
+                    user.role === 'STUDENT'
+                      ? 'bg-blue-100 text-blue-700'
+                      : 'bg-teal-100 text-teal-700'
+                  }`}>
                     {user.role}
                   </span>
                 </td>
-                <td style={styles.td}>
+                <td className="px-4 py-3 text-sm">
                   {user.role === 'STUDENT' && (
-                    <button 
+                    <button
                       onClick={() => handlePromote(user.id)}
-                      style={styles.button}
+                      className="px-3 py-1 bg-indigo-600 text-white text-sm font-semibold rounded-md hover:bg-indigo-700 focus:outline-none"
                     >
                       Promote
                     </button>
@@ -102,97 +98,11 @@ export default function AdminDashboard() {
   };
 
   return (
-    <div style={styles.container}>
-      <h1 style={styles.title}>Admin Dashboard</h1>
-      <h2 style={styles.subtitle}>User Management</h2>
+    <div className="max-w-7xl mx-auto px-6 py-8 font-inter">
+      <h1 className="text-3xl font-bold text-gray-900 mb-2">Admin Dashboard</h1>
+      <h2 className="text-2xl font-semibold text-gray-700 mb-6">User Management</h2>
       {promoteError && <ErrorMessage message={promoteError} />}
       {renderContent()}
     </div>
   );
 }
-
-// --- STYLES ---
-
-const styles = {
-  container: {
-    maxWidth: '1200px',
-    margin: '0 auto',
-    padding: '32px 24px',
-    fontFamily: 'Inter, system-ui, sans-serif',
-  },
-  title: {
-    fontSize: '32px',
-    fontWeight: '700',
-    color: '#1a202c',
-    marginBottom: '8px',
-  },
-  subtitle: {
-    fontSize: '24px',
-    fontWeight: '600',
-    color: '#2d3748',
-    marginBottom: '24px',
-  },
-  infoText: {
-    textAlign: 'center',
-    color: '#718096',
-    fontSize: '16px',
-    padding: '20px',
-  },
-  tableContainer: {
-    width: '100%',
-    overflowX: 'auto',
-    backgroundColor: '#ffffff',
-    borderRadius: '12px',
-    boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.1)',
-  },
-  table: {
-    width: '100%',
-    borderCollapse: 'collapse',
-  },
-  th: {
-    padding: '16px 20px',
-    textAlign: 'left',
-    fontSize: '14px',
-    fontWeight: '600',
-    color: '#718096',
-    textTransform: 'uppercase',
-    borderBottom: '2px solid #f3f4f6',
-    backgroundColor: '#f9fafb',
-  },
-  tr: {
-    borderBottom: '1Spx solid #f3f4f6',
-  },
-  td: {
-    padding: '16px 20px',
-    fontSize: '14px',
-    color: '#2d3748',
-  },
-  roleStudent: {
-    padding: '4px 8px',
-    backgroundColor: '#ebf4ff',
-    color: '#2b6cb0',
-    borderRadius: '6px',
-    fontWeight: '500',
-    fontSize: '12px',
-  },
-  roleOrganizer: {
-    padding: '4px 8px',
-    backgroundColor: '#e6fffa',
-    color: '#2c7a7b',
-    borderRadius: '6px',
-    fontWeight: '500',
-    fontSize: '12px',
-  },
-  button: {
-    padding: '8px 12px',
-    backgroundColor: '#4c51bf',
-    color: '#ffffff',
-    borderRadius: '8px',
-    border: 'none',
-    fontSize: '14px',
-    fontWeight: '600',
-    cursor: 'pointer',
-    transition: 'background-color 0.2s',
-  },
-};
-

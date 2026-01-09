@@ -1,22 +1,14 @@
 import React, { useState, useEffect } from "react";
-import { useParams, Link, useNavigate } from "react-router-dom"; 
+import { useParams, Link, useNavigate } from "react-router-dom";
 import api from "../utils/api";
 import { useAuth } from "./context/AuthContext.jsx";
 import Spinner from "../components/common/Spinner.jsx";
 import ErrorMessage from "../components/common/ErrorMessage.jsx";
-import {
-  Calendar,
-  MapPin,
-  DollarSign,
-  Info,
-  Users,
-  CheckCircle,
-  Trophy,
-} from "lucide-react"; 
+import { Calendar, MapPin, DollarSign, Info, Users, CheckCircle, Trophy } from "lucide-react";
 
 // Helper to format date
-const formatDateTime = (dateString) => {
-  return new Date(dateString).toLocaleString("en-US", {
+const formatDateTime = (dateString) =>
+  new Date(dateString).toLocaleString("en-US", {
     weekday: "long",
     year: "numeric",
     month: "long",
@@ -25,12 +17,11 @@ const formatDateTime = (dateString) => {
     minute: "2-digit",
     hour12: true,
   });
-};
 
 export default function EventDetail() {
   const { id } = useParams();
   const { user } = useAuth();
-  const navigate = useNavigate(); 
+  const navigate = useNavigate();
 
   const [event, setEvent] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -60,9 +51,7 @@ export default function EventDetail() {
       }
     };
 
-    if (id) {
-      fetchEvent();
-    }
+    if (id) fetchEvent();
   }, [id, user.id]);
 
   const handleRegister = async () => {
@@ -72,38 +61,30 @@ export default function EventDetail() {
       await api.post(`/api/events/${id}/register-individual`);
       setIsRegistered(true);
     } catch (err) {
-      setRegistrationError(
-        err.response?.data?.message || "Registration failed"
-      );
+      setRegistrationError(err.response?.data?.message || "Registration failed");
     } finally {
       setIsRegistering(false);
     }
   };
 
   const renderRegistrationButton = () => {
-    if (!user || user.role !== "STUDENT") {
-      return null;
-    }
+    if (!user || user.role !== "STUDENT") return null;
 
     if (isRegistered) {
       return (
-        <div style={{ ...styles.regButtonBase, ...styles.regButtonSuccess }}>
-          <CheckCircle
-            style={{ width: "20px", height: "20px", marginRight: "8px" }}
-          />
+        <div className="flex items-center justify-center w-full py-3 rounded-lg bg-green-100 text-green-800 font-semibold">
+          <CheckCircle className="w-5 h-5 mr-2" />
           You are registered!
         </div>
       );
     }
 
-    if (!event) {
-      return null;
-    }
+    if (!event) return null;
 
     if (event.registrations.length >= event.registration_limit) {
       return (
         <button
-          style={{ ...styles.regButtonBase, ...styles.regButtonFull }}
+          className="w-full py-3 rounded-lg bg-gray-200 text-gray-600 font-semibold cursor-not-allowed"
           disabled
         >
           Registrations Full
@@ -115,11 +96,11 @@ export default function EventDetail() {
       <button
         onClick={handleRegister}
         disabled={isRegistering}
-        style={
+        className={`w-full py-3 rounded-lg font-semibold ${
           isRegistering
-            ? { ...styles.regButtonBase, ...styles.regButtonDisabled }
-            : { ...styles.regButtonBase, ...styles.regButtonPrimary }
-        }
+            ? "bg-gray-400 text-white cursor-not-allowed"
+            : "bg-indigo-600 text-white hover:bg-indigo-700"
+        }`}
       >
         {isRegistering ? "Registering..." : "Register for this Event"}
       </button>
@@ -129,20 +110,16 @@ export default function EventDetail() {
   const renderAdminButtons = () => {
     if (!event) return null;
 
-    // Show button if user is the creator OR an Admin
-    const isCreatorOrAdmin =
-      user.id === event.created_by || user.role === "ADMIN";
+    const isCreatorOrAdmin = user.id === event.created_by || user.role === "ADMIN";
 
     if (isCreatorOrAdmin) {
       return (
-        <div style={{ marginTop: "16px" }}>
+        <div className="mt-4">
           <button
-            style={{ ...styles.regButtonBase, ...styles.adminButton }}
+            className="flex items-center justify-center w-full py-3 rounded-lg bg-gray-100 border border-gray-300 text-gray-800 font-semibold hover:bg-gray-200"
             onClick={() => navigate(`/event/${event.id}/post-results`)}
           >
-            <Trophy
-              style={{ width: "18px", height: "18px", marginRight: "8px" }}
-            />
+            <Trophy className="w-4 h-4 mr-2" />
             Post Results
           </button>
         </div>
@@ -153,42 +130,42 @@ export default function EventDetail() {
 
   if (loading) return <Spinner />;
   if (error) return <ErrorMessage message={error} />;
-  if (!event) return <p>Event not found.</p>;
+  if (!event) return <p className="text-center mt-8 text-gray-600">Event not found.</p>;
 
   const placeholderImage = `https://placehold.co/1200x600/6366f1/white?text=${encodeURIComponent(
     event.title
   )}&font=inter`;
 
   return (
-    <div style={styles.page}>
-      <div style={styles.container}>
-        <div style={styles.card}>
+    <div className="bg-gray-50 md:p-10 p-8 min-h-screen font-inter py-8">
+      <div className="max-w-6xl mx-auto px-4">
+        <div className="bg-white rounded-xl shadow-lg overflow-hidden">
           <img
             src={event.banner_url || placeholderImage}
             alt={`${event.title} banner`}
-            style={styles.banner}
-            onError={(e) => {
-              e.target.src = placeholderImage;
-            }}
+            className="w-full h-80 object-cover"
+            onError={(e) => (e.target.src = placeholderImage)}
           />
 
-          <div style={styles.contentGrid}>
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 p-8">
             {/* Main Content */}
-            <div style={styles.mainContent}>
-              <h1 style={styles.title}>{event.title}</h1>
+            <div className="lg:col-span-2 space-y-6">
+              <h1 className="text-4xl font-bold text-cyan-800">{event.title}</h1>
 
-              <h2 style={styles.sectionTitle}>
-                <Info style={styles.icon} />
-                About this Event
-              </h2>
-              <p style={styles.description}>
-                {event.description || "No description provided."}
-              </p>
+              <div className="">
+                <h2 className="text-xl font-semibold text-amber-900 flex items-center mb-2">
+                  <Info className="w-5 h-5 mr-2 text-indigo-600" />
+                  About this Event
+                </h2>
+                <p className="text-gray-600 leading-relaxed">
+                  {event.description || "No description provided."}
+                </p>
+              </div>
 
               {event.club && (
-                <div style={styles.clubBox}>
-                  <h3 style={styles.clubTitle}>Hosted By:</h3>
-                  <div style={{ display: "flex", alignItems: "center" }}>
+                <div className="bg-gray-50 border border-gray-200 p-4 rounded-lg">
+                  <h3 className="text-sm font-semibold text-gray-500 mb-2">Hosted By:</h3>
+                  <div className="flex items-center">
                     <img
                       src={
                         event.club?.club_logo_url ||
@@ -197,17 +174,17 @@ export default function EventDetail() {
                         )}`
                       }
                       alt={event.club.name}
-                      style={styles.clubLogo}
+                      className="w-12 h-12 rounded-full object-cover mr-3"
                     />
                     <div>
                       <Link
                         to={`/club/${event.club.id}`}
-                        style={styles.clubName}
+                        className="text-lg font-bold text-gray-900 hover:text-indigo-600"
                       >
                         {event.club.name}
                       </Link>
                       {event.creator && (
-                        <p style={styles.clubOrganizer}>
+                        <p className="text-sm text-gray-500">
                           Organized by {event.creator.name}
                         </p>
                       )}
@@ -218,51 +195,44 @@ export default function EventDetail() {
             </div>
 
             {/* Sidebar */}
-            <div style={styles.sidebar}>
-              <div style={styles.sidebarBox}>
-                <div style={styles.price}>
-                  <DollarSign style={styles.icon} />
-                  <span>
-                    {event.price === 0 ? "Free Event" : `$${event.price}`}
-                  </span>
+            <div className="space-y-6">
+              <div className="bg-white border border-gray-200 rounded-lg p-6 space-y-4">
+                <div className="flex items-center text-indigo-600 text-lg font-bold">
+                  <DollarSign className="w-5 h-5 mr-2" />
+                  {event.price === 0 ? "Free Event" : `$${event.price}`}
                 </div>
 
-                <ul style={styles.infoList}>
-                  <li style={styles.infoItem}>
-                    <Calendar style={{ ...styles.icon, ...styles.infoIcon }} />
+                <ul className="space-y-4">
+                  <li className="flex items-start">
+                    <Calendar className="w-5 h-5 mr-3 text-gray-500 flex-shrink-0 mt-1" />
                     <div>
-                      <h4 style={styles.infoTitle}>Date & Time</h4>
-                      <p style={styles.infoText}>
-                        {formatDateTime(event.event_datetime)}
-                      </p>
+                      <h4 className="font-semibold text-gray-700">Date & Time</h4>
+                      <p className="text-gray-500 text-sm">{formatDateTime(event.event_datetime)}</p>
                     </div>
                   </li>
-                  <li style={styles.infoItem}>
-                    <MapPin style={{ ...styles.icon, ...styles.infoIcon }} />
+                  <li className="flex items-start">
+                    <MapPin className="w-5 h-5 mr-3 text-gray-500 flex-shrink-0 mt-1" />
                     <div>
-                      <h4 style={styles.infoTitle}>Location</h4>
-                      <p style={styles.infoText}>{event.venue || "Online"}</p>
+                      <h4 className="font-semibold text-gray-700">Location</h4>
+                      <p className="text-gray-500 text-sm">{event.venue || "Online"}</p>
                     </div>
                   </li>
-                  <li style={styles.infoItem}>
-                    <Users style={{ ...styles.icon, ...styles.infoIcon }} />
+                  <li className="flex items-start">
+                    <Users className="w-5 h-5 mr-3 text-gray-500 flex-shrink-0 mt-1" />
                     <div>
-                      <h4 style={styles.infoTitle}>Registrations</h4>
-                      <p style={styles.infoText}>
-                        {event._count.registrations} /{" "}
-                        {event.registration_limit}
+                      <h4 className="font-semibold text-gray-700">Registrations</h4>
+                      <p className="text-gray-500 text-sm">
+                        {event._count.registrations} / {event.registration_limit}
                       </p>
                     </div>
                   </li>
                 </ul>
 
-                {registrationError && (
-                  <ErrorMessage message={registrationError} />
-                )}
+                {registrationError && <ErrorMessage message={registrationError} />}
 
-                <div style={{ marginTop: "24px" }}>
+                <div className="mt-6 space-y-2">
                   {renderRegistrationButton()}
-                  {renderAdminButtons()} 
+                  {renderAdminButtons()}
                 </div>
               </div>
             </div>
@@ -272,122 +242,3 @@ export default function EventDetail() {
     </div>
   );
 }
-
-// --- STYLES ---
-const styles = {
-  page: {
-    backgroundColor: "#f9fafb",
-    minHeight: "100vh",
-    fontFamily: "Inter, system-ui, sans-serif",
-  },
-  container: { maxWidth: "1024px", margin: "32px auto", padding: "0 24px" },
-  card: {
-    backgroundColor: "#ffffff",
-    borderRadius: "16px",
-    boxShadow: "0 10px 25px rgba(0, 0, 0, 0.1)",
-    overflow: "hidden",
-  },
-  banner: { width: "100%", height: "350px", objectFit: "cover" },
-  contentGrid: {
-    display: "grid",
-    gridTemplateColumns: "2fr 1fr",
-    gap: "24px",
-    padding: "32px",
-  },
-  mainContent: {},
-  sidebar: {},
-  title: {
-    fontSize: "36px",
-    fontWeight: "700",
-    color: "#1a202c",
-    marginBottom: "16px",
-  },
-  sectionTitle: {
-    fontSize: "20px",
-    fontWeight: "600",
-    color: "#111827",
-    marginBottom: "8px",
-    display: "flex",
-    alignItems: "center",
-  },
-  icon: { width: "20px", height: "20px", marginRight: "8px", color: "#4c51bf" },
-  description: {
-    fontSize: "16px",
-    color: "#4a5568",
-    lineHeight: 1.6,
-    marginBottom: "24px",
-  },
-  clubBox: {
-    backgroundColor: "#f9fafb",
-    border: "1px solid #f3f4f6",
-    padding: "16px",
-    borderRadius: "12px",
-  },
-  clubTitle: {
-    fontSize: "14px",
-    fontWeight: "600",
-    color: "#718096",
-    marginBottom: "8px",
-  },
-  clubLogo: {
-    width: "50px",
-    height: "50px",
-    borderRadius: "50%",
-    objectFit: "cover",
-    marginRight: "12px",
-  },
-  clubName: {
-    fontSize: "18px",
-    fontWeight: "700",
-    color: "#1a202c",
-    textDecoration: "none",
-  },
-  clubOrganizer: { fontSize: "14px", color: "#718096", margin: 0 },
-  sidebarBox: {
-    border: "1px solid #e2e8f0",
-    borderRadius: "12px",
-    padding: "24px",
-    backgroundColor: "#ffffff",
-  },
-  price: {
-    display: "flex",
-    alignItems: "center",
-    fontSize: "20px",
-    fontWeight: "700",
-    color: "#4c51bf",
-    marginBottom: "16px",
-  },
-  infoList: { listStyle: "none", padding: 0, margin: 0, spaceY: "16px" },
-  infoItem: { display: "flex", alignItems: "flex-start", marginBottom: "16px" },
-  infoIcon: { flexShrink: 0, marginTop: "3px", color: "#718096" },
-  infoTitle: { fontWeight: "600", color: "#374151" },
-  infoText: { color: "#718096", fontSize: "14px" },
-  regButtonBase: {
-    width: "100%",
-    padding: "12px 16px",
-    borderRadius: "8px",
-    fontWeight: "600",
-    cursor: "pointer",
-    border: "none",
-    display: "flex",
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  regButtonPrimary: { backgroundColor: "#4c51bf", color: "#ffffff" },
-  regButtonSuccess: { backgroundColor: "#d1fae5", color: "#065f46" },
-  regButtonFull: {
-    backgroundColor: "#e5e7eb",
-    color: "#4b5563",
-    cursor: "not-allowed",
-  },
-  regButtonDisabled: {
-    backgroundColor: "#a0aec0",
-    color: "#ffffff",
-    cursor: "not-allowed",
-  },
-  adminButton: {
-    backgroundColor: "#f3f4f6",
-    color: "#1f2937",
-    border: "1px solid #d1d5db",
-  },
-};

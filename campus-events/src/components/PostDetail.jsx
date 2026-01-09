@@ -16,7 +16,6 @@ export default function PostDetail() {
   const [newComment, setNewComment] = useState('');
   const [isCommenting, setIsCommenting] = useState(false);
 
-  // Function to fetch the post and its comments
   const fetchPost = async () => {
     try {
       setLoading(true);
@@ -29,7 +28,6 @@ export default function PostDetail() {
     }
   };
 
-  // Fetch data on component mount
   useEffect(() => {
     fetchPost();
   }, [postId]);
@@ -47,17 +45,13 @@ export default function PostDetail() {
       const response = await api.post(`/api/posts/${postId}/comment`, {
         comment: newComment,
       });
-      console.log('Ankit Sharma');
-      console.log('Comment posted:', response.data);
-      
+
       setPost(prevPost => ({
         ...prevPost,
         comments: [...prevPost.comments, response.data.comment],
-        comments_count: (prevPost.comments_count || 0) + 1, 
-
+        comments_count: (prevPost.comments_count || 0) + 1,
       }));
-      setNewComment(''); 
-      
+      setNewComment('');
     } catch (err) {
       setError(err.response?.data?.message || 'Failed to post comment');
     } finally {
@@ -72,37 +66,45 @@ export default function PostDetail() {
   const userAvatarPlaceholder = `https://placehold.co/50x50/e0e7ff/4338ca?text=${encodeURIComponent(user.name.charAt(0))}&font=inter`;
 
   return (
-    <div style={styles.container}>
-      {/*  The Post */}
+    <div className="max-w-2xl mx-auto px-6 mt-8 font-inter">
+      {/* Post */}
       <PostCard post={post} onPostUpdate={handlePostUpdate} />
 
-      <form style={styles.commentForm} onSubmit={handleCommentSubmit}>
+      {/* Comment Form */}
+      <form
+        onSubmit={handleCommentSubmit}
+        className="flex items-center gap-3 p-4 bg-white rounded-2xl shadow mt-6"
+      >
         <img
           src={user.profile_photo || userAvatarPlaceholder}
           alt="Your avatar"
-          style={styles.commentAvatar}
-          onError={(e) => { e.target.src = userAvatarPlaceholder; }}
+          className="w-10 h-10 rounded-full object-cover"
+          onError={(e) => (e.target.src = userAvatarPlaceholder)}
         />
         <input
           type="text"
-          style={styles.commentInput}
           value={newComment}
           onChange={(e) => setNewComment(e.target.value)}
           placeholder="Write a comment..."
+          className="flex-1 p-2.5 bg-gray-100 rounded-lg border border-gray-300 text-sm outline-none"
         />
-        <button type="submit" style={styles.commentButton} disabled={isCommenting}>
+        <button
+          type="submit"
+          disabled={isCommenting}
+          className={`px-4 py-2 rounded-lg font-semibold text-white ${
+            isCommenting ? 'bg-gray-400 cursor-not-allowed' : 'bg-indigo-600 hover:bg-indigo-700'
+          }`}
+        >
           {isCommenting ? '...' : 'Post'}
         </button>
       </form>
 
-      {/*  Comments List */}
-      <div style={styles.commentList}>
+      {/* Comments List */}
+      <div className="mt-6 space-y-4">
         {post.comments.length === 0 ? (
-          <p style={styles.noComments}>No comments yet.</p>
+          <p className="text-center text-gray-400 text-sm py-4">No comments yet.</p>
         ) : (
-          post.comments.map(comment => (
-            <Comment key={comment.id} comment={comment} />
-          ))
+          post.comments.map(comment => <Comment key={comment.id} comment={comment} />)
         )}
       </div>
     </div>
@@ -112,106 +114,29 @@ export default function PostDetail() {
 // --- Reusable Comment Component ---
 const Comment = ({ comment }) => {
   const avatarPlaceholder = `https://placehold.co/40x40/e0e7ff/4338ca?text=${encodeURIComponent(comment.user.name.charAt(0))}&font=inter`;
+
   return (
-    <div style={styles.comment}>
+    <div className="flex gap-3">
       <img
         src={comment.user.profile_photo || avatarPlaceholder}
         alt={comment.user.name}
-        style={styles.commentAvatar}
-        onError={(e) => { e.target.src = avatarPlaceholder; }}
+        className="w-10 h-10 rounded-full object-cover"
+        onError={(e) => (e.target.src = avatarPlaceholder)}
       />
-      <div style={styles.commentBody}>
-        <p style={styles.commentText}>
-          <Link to={`/profile/${comment.user.id}`} style={styles.commentUser}>
+      <div className="bg-gray-100 p-3 rounded-xl flex-1">
+        <p className="text-sm text-gray-900">
+          <Link
+            to={`/profile/${comment.user.id}`}
+            className="font-semibold text-gray-900 mr-1"
+          >
             {comment.user.name}
           </Link>
-          {' '}
           {comment.comment}
         </p>
-        <p style={styles.commentDate}>
+        <p className="text-xs text-gray-400 mt-1">
           {new Date(comment.created_at).toLocaleDateString()}
         </p>
       </div>
     </div>
   );
-};
-
-// --- STYLES ---
-const styles = {
-  container: {
-    maxWidth: '700px',
-    margin: '32px auto',
-    padding: '0 24px',
-    fontFamily: 'Inter, system-ui, sans-serif',
-  },
-  commentForm: {
-    display: 'flex',
-    alignItems: 'center',
-    gap: '12px',
-    padding: '16px',
-    backgroundColor: '#ffffff',
-    borderRadius: '16px',
-    boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.05)',
-    marginTop: '24px',
-  },
-  commentInput: {
-    flex: 1,
-    padding: '10px 14px',
-    border: '1px solid #d1d5db',
-    borderRadius: '8px',
-    backgroundColor: '#f9fafb',
-    fontSize: '15px',
-    outline: 'none',
-  },
-  commentButton: {
-    padding: '10px 16px',
-    backgroundColor: '#4c51bf',
-    color: '#ffffff',
-    border: 'none',
-    borderRadius: '8px',
-    fontWeight: '600',
-    cursor: 'pointer',
-  },
-  commentList: {
-    marginTop: '24px',
-  },
-  comment: {
-    display: 'flex',
-    gap: '12px',
-    padding: '12px 0',
-  },
-  commentAvatar: {
-    width: '40px',
-    height: '40px',
-    borderRadius: '50%',
-    objectFit: 'cover',
-  },
-  commentBody: {
-    backgroundColor: '#f3f4f6',
-    padding: '10px 14px',
-    borderRadius: '12px',
-    flex: 1,
-  },
-  commentText: {
-    margin: 0,
-    fontSize: '15px',
-    color: '#1a202c',
-    lineHeight: 1.5,
-  },
-  commentUser: {
-    fontWeight: '600',
-    color: 'inherit',
-    textDecoration: 'none',
-  },
-  commentDate: {
-    margin: '4px 0 0',
-    fontSize: '12px',
-    color: '#718096',
-  },
-  noComments: {
-    textAlign: 'center',
-    fontSize: '15px',
-    color: '#718096',
-    padding: '20px',
-  },
 };

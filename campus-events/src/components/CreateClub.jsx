@@ -8,7 +8,7 @@ export default function CreateClub() {
   const [formData, setFormData] = useState({
     name: "",
     description: "",
-    organizer_id: "", 
+    organizer_id: "",
   });
   const [organizers, setOrganizers] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -16,7 +16,6 @@ export default function CreateClub() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const navigate = useNavigate();
 
-  // Fetch all users and filter for Organizers
   useEffect(() => {
     const fetchOrganizers = async () => {
       try {
@@ -27,7 +26,6 @@ export default function CreateClub() {
         );
         setOrganizers(orgUsers);
 
-        // Set default selection if organizers exist
         if (orgUsers.length > 0) {
           setFormData((prev) => ({ ...prev, organizer_id: orgUsers[0].id }));
         }
@@ -40,7 +38,6 @@ export default function CreateClub() {
     fetchOrganizers();
   }, []);
 
-  //  Handle form changes
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData((prev) => ({
@@ -49,22 +46,17 @@ export default function CreateClub() {
     }));
   };
 
-  //  Handle form submission
   const handleSubmit = async (e) => {
     e.preventDefault();
     setIsSubmitting(true);
     setError("");
 
     try {
-      // Ensure organizer_id is an integer
       const dataToSubmit = {
         ...formData,
         organizer_id: parseInt(formData.organizer_id, 10),
       };
-
       await api.post("/api/clubs", dataToSubmit);
-
-      // Success! Go back to the main clubs list
       navigate("/clubs");
     } catch (err) {
       setError(err.response?.data?.message || "Failed to create club");
@@ -76,17 +68,19 @@ export default function CreateClub() {
   if (loading) return <Spinner />;
 
   return (
-    <div style={styles.container}>
-      <h1 style={styles.title}>Create New Club</h1>
-      <form style={styles.form} onSubmit={handleSubmit}>
+    <div className="max-w-2xl mx-auto mt-12 p-10 bg-white rounded-2xl shadow-lg font-inter">
+      <h1 className="text-2xl font-bold text-gray-900 text-center mb-6">
+        Create New Club
+      </h1>
+      <form className="flex flex-col gap-5" onSubmit={handleSubmit}>
         {error && <ErrorMessage message={error} />}
 
         {organizers.length === 0 ? (
           <ErrorMessage message="No Organizers found. Please promote a Student to an Organizer on the Admin Dashboard before creating a club." />
         ) : (
           <>
-            <div style={styles.field}>
-              <label htmlFor="name" style={styles.label}>
+            <div className="w-full">
+              <label htmlFor="name" className="block text-sm font-semibold text-gray-600 mb-2">
                 Club Name
               </label>
               <input
@@ -94,23 +88,23 @@ export default function CreateClub() {
                 name="name"
                 id="name"
                 required
-                style={styles.input}
                 value={formData.name}
                 onChange={handleChange}
+                className="w-full px-4 py-3 border border-gray-300 rounded-lg bg-gray-50 text-gray-800 text-base focus:outline-none focus:ring-2 focus:ring-indigo-400"
               />
             </div>
 
-            <div style={styles.field}>
-              <label htmlFor="organizer_id" style={styles.label}>
+            <div className="w-full">
+              <label htmlFor="organizer_id" className="block text-sm font-semibold text-gray-600 mb-2">
                 Assign to Organizer
               </label>
               <select
                 name="organizer_id"
                 id="organizer_id"
                 required
-                style={styles.input}
                 value={formData.organizer_id}
                 onChange={handleChange}
+                className="w-full px-4 py-3 border border-gray-300 rounded-lg bg-gray-50 text-gray-800 text-base focus:outline-none focus:ring-2 focus:ring-indigo-400"
               >
                 {organizers.map((org) => (
                   <option key={org.id} value={org.id}>
@@ -120,21 +114,25 @@ export default function CreateClub() {
               </select>
             </div>
 
-            <div style={styles.field}>
-              <label htmlFor="description" style={styles.label}>
+            <div className="w-full">
+              <label htmlFor="description" className="block text-sm font-semibold text-gray-600 mb-2">
                 Description
               </label>
               <textarea
                 name="description"
                 id="description"
                 rows="4"
-                style={styles.textarea}
                 value={formData.description}
                 onChange={handleChange}
+                className="w-full px-4 py-3 border border-gray-300 rounded-lg bg-gray-50 text-gray-800 text-base focus:outline-none focus:ring-2 focus:ring-indigo-400 resize-vertical"
               ></textarea>
             </div>
 
-            <button type="submit" style={styles.button} disabled={isSubmitting}>
+            <button
+              type="submit"
+              disabled={isSubmitting}
+              className="mt-3 px-6 py-3 bg-indigo-600 text-white font-bold rounded-xl text-base hover:bg-indigo-700 transition-colors disabled:opacity-50"
+            >
               {isSubmitting ? "Creating..." : "Create Club"}
             </button>
           </>
@@ -143,71 +141,3 @@ export default function CreateClub() {
     </div>
   );
 }
-
-// --- STYLES ---
-const styles = {
-  container: {
-    maxWidth: "700px",
-    margin: "32px auto",
-    padding: "40px",
-    backgroundColor: "#ffffff",
-    borderRadius: "16px",
-    boxShadow: "0 10px 25px rgba(0, 0, 0, 0.1)",
-    fontFamily: "Inter, system-ui, sans-serif",
-  },
-  title: {
-    fontSize: "28px",
-    fontWeight: "700",
-    color: "#1a202c",
-    marginBottom: "24px",
-    textAlign: "center",
-  },
-  form: {
-    display: "flex",
-    flexDirection: "column",
-    gap: "20px",
-  },
-  field: {
-    width: "100%",
-  },
-  label: {
-    display: "block",
-    fontSize: "14px",
-    fontWeight: "600",
-    color: "#4a5568",
-    marginBottom: "6px",
-  },
-  input: {
-    width: "100%",
-    padding: "12px 15px",
-    border: "1px solid #d1d5db",
-    borderRadius: "8px",
-    backgroundColor: "#f9fafb",
-    fontSize: "16px",
-    color: "#2d3748",
-    boxSizing: "border-box",
-  },
-  textarea: {
-    width: "100%",
-    padding: "12px 15px",
-    border: "1px solid #d1d5db",
-    borderRadius: "8px",
-    backgroundColor: "#f9fafb",
-    fontSize: "16px",
-    color: "#2d3748",
-    fontFamily: "Inter, system-ui, sans-serif",
-    boxSizing: "border-box",
-    resize: "vertical",
-  },
-  button: {
-    padding: "14px 20px",
-    backgroundColor: "#4c51bf",
-    color: "#ffffff",
-    fontSize: "16px",
-    fontWeight: "700",
-    borderRadius: "10px",
-    border: "none",
-    cursor: "pointer",
-    marginTop: "10px",
-  },
-};

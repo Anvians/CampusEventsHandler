@@ -16,22 +16,15 @@ const AdminRoute = ({ children }) => {
   if (user.role !== 'ADMIN') {
     return <Navigate to="/" state={{ from: location }} replace />;
   }
+
   return children;
 };
 
+// Tailwind full-page spinner
 const FullPageSpinner = () => (
-  <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}>
-    <div style={{
-      animation: 'spin 1s linear infinite',
-      borderRadius: '50%',
-      height: '64px',
-      width: '64px',
-      border: '4px solid rgba(0, 0, 0, 0.1)',
-      borderBottomColor: '#4c51bf',
-    }}></div>
+  <div className="flex justify-center items-center h-screen">
+    <div className="w-16 h-16 border-4 border-gray-200 border-b-indigo-600 rounded-full animate-spin"></div>
   </div>
 );
-
-
 
 export default AdminRoute;
