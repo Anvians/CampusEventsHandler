@@ -51,7 +51,7 @@ export const getMyProfile = async (req, res) => {
         created_at: p.created_at
     }));
 
-    const clubs = await prisma.club_membership.findMany({
+    const clubs = await prisma.clubMember.findMany({
       where: { user_id: userId },
       select: { club: { select: { id: true, name: true, club_logo_url: true } } }
     });
