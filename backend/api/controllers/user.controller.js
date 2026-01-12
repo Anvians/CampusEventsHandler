@@ -75,10 +75,10 @@ export const getMyProfile = async (req, res) => {
       // leave posts/follow counts empty/0
     }
 
-    // 3️⃣ Fetch club memberships from Prisma (optional)
+    //  Fetch club memberships from Prisma (optional)
     let clubs = [];
     try {
-      clubs = await prisma.club_membership.findMany({
+      clubs = await prisma.clubMember.findMany({
         where: { user_id: userId },
         select: { club: { select: { id: true, name: true, club_logo_url: true } } }
       });
@@ -86,7 +86,7 @@ export const getMyProfile = async (req, res) => {
       console.error("Club fetch error:", clubErr);
     }
 
-    // 4️⃣ Return combined result
+    // Return combined result
     const result = {
       ...user,
       posts,
