@@ -25,47 +25,74 @@ const selectUserFields = {
 
 
 // ---------------- GET MY PROFILE ----------------
+// ---------------- GET MY PROFILE ----------------
 export const getMyProfile = async (req, res) => {
   try {
     const userId = Number(req.user.id);
 
+    // 1️⃣ Fetch user profile from Prisma
     const user = await prisma.user.findUnique({
       where: { id: userId },
-      select: { /* ... keep your existing selects ... */ 
-        id: true, name: true, email: true, department: true, 
-        year: true, profile_photo: true, bio: true, 
-        verified: true, created_at: true 
+      select: { 
+        id: true,
+        name: true,
+        email: true,
+        department: true,
+        year: true,
+        profile_photo: true,
+        bio: true,
+        verified: true,
+        created_at: true
       }
     });
 
     if (!user) return res.status(404).json({ message: "User not found" });
 
-    const posts = await Post.find({ user_id: userId }).sort({ created_at: -1 });
-    
-    const formattedPosts = posts.map(p => ({
+    // 2️⃣ Prepare safe Mongo results
+    let posts = [];
+    let followersCount = 0;
+    let followingCount = 0;
+
+    try {
+      const userIdStr = userId.toString(); // ensure type matches Mongo documents
+
+      // Fetch posts
+      posts = await Post.find({ user_id: userIdStr }).sort({ created_at: -1 });
+      posts = posts.map(p => ({
         id: p._id.toString(),
         caption: p.caption,
         image_url: p.image_url,
         likes_count: p.likes_count || 0,
         comments_count: p.comments_count || 0,
         created_at: p.created_at
-    }));
+      }));
 
-    const clubs = await prisma.club_membership.findMany({
-      where: { user_id: userId },
-      select: { club: { select: { id: true, name: true, club_logo_url: true } } }
-    });
+      // Fetch follow counts
+      followersCount = await Follow.countDocuments({ following_id: userIdStr });
+      followingCount = await Follow.countDocuments({ follower_id: userIdStr });
+    } catch (mongoErr) {
+      console.error("Mongo query error in profile:", mongoErr);
+      // leave posts/follow counts empty/0
+    }
 
-    // Add Follow Counts
-    const followersCount = await Follow.countDocuments({ following_id: userId });
-    const followingCount = await Follow.countDocuments({ follower_id: userId });
+    // 3️⃣ Fetch club memberships from Prisma (optional)
+    let clubs = [];
+    try {
+      clubs = await prisma.club_membership.findMany({
+        where: { user_id: userId },
+        select: { club: { select: { id: true, name: true, club_logo_url: true } } }
+      });
+    } catch (clubErr) {
+      console.error("Club fetch error:", clubErr);
+    }
 
+    // 4️⃣ Return combined result
     const result = {
       ...user,
-      posts: formattedPosts,
+      posts,
       club_memberships: clubs,
       _count: {
-        posts: formattedPosts.length,
+        posts: posts.length,
         followers: followersCount,
         following: followingCount
       }

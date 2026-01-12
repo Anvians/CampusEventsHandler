@@ -6,6 +6,7 @@ import {
   joinClub,
   leaveClub,
   getOrganizerClubs,
+  deleteClub
 } from '../controllers/club.controller.js'; 
 import {
   verifyAuth,
@@ -21,6 +22,10 @@ router.post('/', verifyAuth, isAdmin, createClub);
 
 // GET /api/clubs/my-clubs
 router.get('/my-clubs', verifyAuth, isOrganizer, getOrganizerClubs);
+
+//POST /api/clubs/id/delete
+router.delete('/:id', verifyAuth, deleteClub); 
+// controller checks admin / organizer
 
 // GET /api/clubs
 router.get('/', verifyAuth, getAllClubs);

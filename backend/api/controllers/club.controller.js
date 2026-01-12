@@ -75,9 +75,11 @@ export const getAllClubs = async (req, res) => {
   try {
     const clubs = await prisma.club.findMany({
       select: selectClubFields,
+      where: { isDeleted: false },
       orderBy: {
         name: 'asc',
       },
+
     });
     res.json(clubs);
   } catch (err) {
@@ -94,9 +96,10 @@ export const getClubById = async (req, res) => {
       return res.status(400).json({ message: 'Invalid club ID' });
     }
 
-    const club = await prisma.club.findUnique({
+    const club = await prisma.club.findFirst({
       where: {
-        id: clubId, 
+        id: clubId,
+        isDeleted: false,
       },
       include: {
         organizer: {
@@ -118,7 +121,7 @@ export const getClubById = async (req, res) => {
         },
         events: {
           where: {
-            is_active: true,
+            isDeleted: false, // ✅ FIXED
           },
         },
         _count: {
@@ -229,6 +232,7 @@ export const getOrganizerClubs = async (req, res) => {
     const clubs = await prisma.club.findMany({
       where: {
         organizer_id: organizerId,
+        isDeleted: false, // ✅ FIXED
       },
       select: {
         id: true,
@@ -246,3 +250,51 @@ export const getOrganizerClubs = async (req, res) => {
   }
 };
 
+
+
+export const deleteClub = async (req, res) => {
+  try {
+    const clubId = Number(req.params.id);
+    const userId = req.user.id;
+    const userRole = req.user.role;
+
+    const club = await prisma.club.findUnique({
+      where: { id: clubId },
+      include: { events: true },
+    });
+
+    if (!club || club.isDeleted) {
+      return res.status(404).json({ message: "Club not found" });
+    }
+
+    const isAdmin = userRole === "ADMIN";
+    const isOrganizer = club.organizer_id === userId;
+
+    if (!isAdmin && !isOrganizer) {
+      return res.status(403).json({
+        message: "Not authorized to delete this club",
+      });
+    }
+
+    // Transaction ensures consistency
+    await prisma.$transaction([
+      prisma.club.update({
+        where: { id: clubId },
+        data: { isDeleted: true },
+      }),
+      prisma.event.updateMany({
+        where: { clubId },
+        data: { isDeleted: true },
+      }),
+    ]);
+
+    return res.status(200).json({
+      message: "Club and its events deleted successfully",
+    });
+  } catch (error) {
+    console.error("Delete club error:", error);
+    return res.status(500).json({
+      message: "Internal server error",
+    });
+  }
+};

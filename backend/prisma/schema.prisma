@@ -83,7 +83,6 @@ model User {
 
   @@index([email])
 }
-
 model Club {
   id            Int      @id @default(autoincrement())
   name          String   @unique
@@ -91,19 +90,19 @@ model Club {
   club_logo_url String?
   created_at    DateTime @default(now())
   updated_at    DateTime @updatedAt
+  isDeleted     Boolean  @default(false) // ✅ ADD THIS
 
-  // Relation to the Organizer (User)
+  // Organizer
   organizer_id Int
   organizer    User   @relation("ClubOrganizers", fields: [organizer_id], references: [id])
 
-  // Relation to Club Members
+  // Relations
   members ClubMember[]
-
-  // Relation to Events
-  events Event[]
+  events  Event[]
 
   @@index([organizer_id])
 }
+
 
 model ClubMember {
   id      Int      @id @default(autoincrement())
@@ -136,6 +135,7 @@ model Event {
   max_team_size      Int?
   created_at         DateTime @default(now())
   updated_at         DateTime @updatedAt
+  isDeleted   Boolean  @default(false) 
 
   // Relation to the Creator (User)
   created_by_id Int
