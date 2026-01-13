@@ -1,9 +1,8 @@
 import Notification from '../models/Notification.model.js';
-import { io } from '../../index.js';
+import { io } from '../../index.js';  // Import io from index.js
 import prisma from "../db/prisma.connection.js";
 
-
-//Fetch enriched notification (MongoDB + Prisma for originator details)
+// Fetch enriched notification (MongoDB + Prisma for originator details)
 export async function getNotificationById(id) {
   const notif = await Notification.findById(id);
 
@@ -27,8 +26,7 @@ export async function getNotificationById(id) {
   };
 }
 
-
-// Create + Emit notification (no deletion of old ones)
+// Create notification and emit via socket
 export const createNotification = async (
   receiver_id,
   message,
@@ -50,7 +48,12 @@ export const createNotification = async (
     const fullNotification = await getNotificationById(saved._id);
 
     if (fullNotification) {
-      io.to(`user_${receiver_id}`).emit("notification:new", fullNotification);
+      if (io) {
+        io.to(`user_${receiver_id}`).emit("notification:new", fullNotification);
+        console.log(`Socket emitted to user_${receiver_id}`); // Debug log
+      } else {
+        console.error("Socket IO instance is undefined - Circular dependency issue suspected.");
+      }
     }
 
     return saved._id.toString();
@@ -60,8 +63,7 @@ export const createNotification = async (
   }
 };
 
-
-// Return ALL notifications sorted + fully enriched
+// Fetch notifications for a user
 export const getNotificationsForUser = async (userId, limit = 30) => {
   const notifications = await Notification.find({ receiver_id: Number(userId) })
     .sort({ created_at: -1 })
@@ -75,8 +77,7 @@ export const getNotificationsForUser = async (userId, limit = 30) => {
   return enriched;
 };
 
-
-// Mark all read but keep stored
+// Mark all notifications as read
 export const markAllNotificationsAsRead = async (userId) => {
   await Notification.updateMany(
     { receiver_id: Number(userId), is_read: false },
@@ -84,8 +85,7 @@ export const markAllNotificationsAsRead = async (userId) => {
   );
 };
 
-
-// Cleanup old notifications 
+// Cleanup old notifications
 export const deleteOldNotifications = async (daysOld = 60) => {
   const cutoff = new Date();
   cutoff.setDate(cutoff.getDate() - daysOld);

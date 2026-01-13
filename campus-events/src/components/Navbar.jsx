@@ -48,6 +48,7 @@ export default function Navbar() {
             <NavLink to="/clubs" className={({ isActive }) => isActive ? activeNavLinkClasses : navLinkClasses}>
               Clubs
             </NavLink>
+
             {user && (
               <>
                 <NavLink to="/feed" className={({ isActive }) => isActive ? activeNavLinkClasses : navLinkClasses}>
@@ -68,6 +69,8 @@ export default function Navbar() {
                 Create Event
               </NavLink>
             )}
+
+            <NavLink to="/announcement" className={({isActive})=>isActive ? activeNavLinkClasses: navLinkClasses}>Announcement</NavLink>
           </div>
 
           {/* Auth Links */}
