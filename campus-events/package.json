@@ -13,6 +13,7 @@
     "@tailwindcss/cli": "^4.1.18",
     "@tailwindcss/vite": "^4.1.18",
     "axios": "^1.13.1",
+    "framer-motion": "^12.26.2",
     "lucide-react": "^0.548.0",
     "react": "^19.1.1",
     "react-dom": "^19.1.1",
