@@ -1,5 +1,6 @@
 import express from 'express';
 import {
+  editProfile,
   getMyProfile,
   getUserProfile,
   getMyNotifications,
@@ -8,13 +9,14 @@ import {
 } from '../controllers/user.controller.js';
 import { followUser, unfollowUser } from '../controllers/social.controller.js';
 import { verifyAuth } from '../middleware/auth.middleware.js';
+import upload from '../config/cloudinary.js';
 
 const router = express.Router();
 
 //  GET /api/users/me
 router.get('/me', verifyAuth, getMyProfile);
 
-//  GET /api/users/notifications
+router.put('/me', verifyAuth, upload.single('profile_photo'), editProfile);//  GET /api/users/notifications
 router.get('/notifications', verifyAuth, getMyNotifications);
 
 //  PUT /api/users/notifications/read

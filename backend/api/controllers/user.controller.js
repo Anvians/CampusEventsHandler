@@ -104,6 +104,41 @@ export const getMyProfile = async (req, res) => {
     res.status(500).json({ message: "Server Error" });
   }
 };
+export const editProfile = async (req, res) => {
+  try {
+    const userId = req.user.id;
+    
+    // 1. Destructure text fields
+    const { name, bio, department, year } = req.body;
+    
+    // 2. Prepare the update object
+    let updateData = {
+      name,
+      bio,
+      department,
+      // Convert 'year' to Int if it exists, otherwise undefined (Prisma handles undefined gracefully)
+      year: year ? parseInt(year, 10) : undefined, 
+    };
+
+    // 3. Handle Cloudinary Image Upload
+    if (req.file) {
+      // With multer-storage-cloudinary, req.file.path IS the public URL
+      updateData.profile_photo = req.file.path; 
+    }
+
+    // 4. Perform the Update
+    const updatedUser = await prisma.user.update({
+      where: { id: userId }, 
+      data: updateData,
+    });
+
+    res.json(updatedUser);
+
+  } catch (e) {
+    console.error('Edit Profile Error:', e);
+    res.status(500).json({ message: 'Server Error updating profile' });
+  }
+};
 
 
 
