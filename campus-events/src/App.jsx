@@ -6,7 +6,7 @@ import {
 } from "react-router-dom";
 
 import Navbar from './components/Navbar.jsx';
-
+import Announcement from './components/Announcement.jsx'
 import Login from "./components/Login.jsx";
 import Signup from "./components/Signup.jsx";
 import Home from "./components/Home.jsx";
@@ -73,6 +73,15 @@ export default function App() {
               <MainLayout><Home /></MainLayout>
             </RouteGuard>
           } 
+        />
+
+        <Route
+        path="/announcement"
+        element={
+          <RouteGuard>
+            <MainLayout><Announcement/></MainLayout>
+          </RouteGuard>
+        }
         />
         <Route 
           path="/profile" 

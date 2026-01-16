@@ -57,7 +57,6 @@ export default function Notifications() {
     }
 
     const onConnect = () => {
-      // console.log("Socket connected"); // Keep logs clean in production
       socket.emit("join", user.id);
     };
 
@@ -107,7 +106,6 @@ export default function Notifications() {
     };
   }, [user]);
 
-  // Dropdown Interaction
   useEffect(() => {
     const handleClickOutside = (event) => {
       if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
@@ -123,7 +121,6 @@ export default function Notifications() {
   const handleNotificationClick = async (notification) => {
     setIsOpen(false);
 
-    // Optimistic UI Update
     if (!notification.is_read) {
       setNotifications((prev) =>
         prev.map((n) =>
@@ -148,11 +145,7 @@ export default function Notifications() {
     if (unreadIds.length === 0) return;
 
     setNotifications(prev => prev.map(n => ({ ...n, is_read: true })));
-
-    // In a real app, you likely have a 'mark-all-read' endpoint. 
-    // If not, iterate (though inefficient) or add the endpoint to backend.
-    // Assuming individual updates for now based on your provided API:
-    unreadIds.forEach(id => {
+   unreadIds.forEach(id => {
        api.put(`/api/users/notifications/${id}/read`).catch(() => {});
     });
   };
