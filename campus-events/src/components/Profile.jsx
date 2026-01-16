@@ -1,11 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { AnimatePresence } from 'framer-motion'; // 2. Framer Motion
+import { AnimatePresence } from 'framer-motion';
 import { useAuth } from './context/AuthContext';
 import api from '../utils/api';
 import Spinner from './common/Spinner';
 import ErrorMessage from './common/ErrorMessage';
-import Modal from './common/Modal'; // 3. Reusable Modal
+import Modal from './common/Modal';
 
 export default function Profile() {
   const { logout } = useAuth();
@@ -17,11 +17,16 @@ export default function Profile() {
   // Modal & Form State
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editLoading, setEditLoading] = useState(false);
+  
+  // Fixed: Initialize state with empty strings, not undefined variables
   const [formData, setFormData] = useState({
     name: '',
     bio: '',
-    profile_photo: null // Storing the file object
+    department: '',
+    year: '',
+    profile_photo: null
   });
+  
   const [previewImage, setPreviewImage] = useState(null);
 
   useEffect(() => {
@@ -45,7 +50,9 @@ export default function Profile() {
     setFormData({
       name: profileData.name || '',
       bio: profileData.bio || '',
-      profile_photo: null
+      department: profileData.department || '',
+      year: profileData.year || '',
+      profile_photo: null,
     });
     setPreviewImage(profileData.profile_photo);
     setIsModalOpen(true);
@@ -57,12 +64,12 @@ export default function Profile() {
     setFormData(prev => ({ ...prev, [name]: value }));
   };
 
-  // 4. Handle Image Upload
+  // Handle Image Upload
   const handleImageChange = (e) => {
     const file = e.target.files[0];
     if (file) {
       setFormData(prev => ({ ...prev, profile_photo: file }));
-      setPreviewImage(URL.createObjectURL(file)); // Generate preview
+      setPreviewImage(URL.createObjectURL(file));
     }
   };
 
@@ -72,10 +79,12 @@ export default function Profile() {
     setEditLoading(true);
     
     try {
-      // Use FormData for file uploads
       const dataPayload = new FormData();
       dataPayload.append('name', formData.name);
       dataPayload.append('bio', formData.bio);
+      dataPayload.append('department', formData.department);
+      dataPayload.append('year', formData.year);
+      
       if (formData.profile_photo) {
         dataPayload.append('profile_photo', formData.profile_photo);
       }
@@ -84,9 +93,10 @@ export default function Profile() {
         headers: { 'Content-Type': 'multipart/form-data' }
       });
 
-      setProfileData(response.data); // Update UI with new data
-      setIsModalOpen(false); // Close Modal
+      setProfileData(response.data);
+      setIsModalOpen(false);
     } catch (err) {
+      console.error(err);
       alert('Failed to update profile');
     } finally {
       setEditLoading(false);
@@ -112,7 +122,7 @@ export default function Profile() {
   return (
     <div className="max-w-4xl mx-auto p-6 relative">
       
-      {/* 2. Framer Motion AnimatePresence handles the mount/unmount animations */}
+      {/* Framer Motion Modal */}
       <AnimatePresence>
         {isModalOpen && (
           <Modal title="Edit Profile" onClose={() => setIsModalOpen(false)}>
@@ -136,6 +146,7 @@ export default function Profile() {
                 </label>
               </div>
 
+              {/* Name Field */}
               <div>
                 <label className="block text-sm font-medium text-gray-700">Name</label>
                 <input
@@ -148,6 +159,33 @@ export default function Profile() {
                 />
               </div>
 
+              {/* Grid for Department & Year */}
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700">Department</label>
+                  <input
+                    type="text"
+                    name="department"
+                    value={formData.department}
+                    onChange={handleInputChange}
+                    placeholder="e.g. CS"
+                    className="mt-1 w-full px-3 py-2 border rounded-lg focus:ring-indigo-500 focus:border-indigo-500"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700">Year</label>
+                  <input
+                    type="number"
+                    name="year"
+                    value={formData.year}
+                    onChange={handleInputChange}
+                    placeholder="e.g. 3"
+                    className="mt-1 w-full px-3 py-2 border rounded-lg focus:ring-indigo-500 focus:border-indigo-500"
+                  />
+                </div>
+              </div>
+
+              {/* Bio Field */}
               <div>
                 <label className="block text-sm font-medium text-gray-700">Bio</label>
                 <textarea
@@ -159,6 +197,7 @@ export default function Profile() {
                 />
               </div>
 
+              {/* Action Buttons */}
               <div className="pt-2 flex gap-3 justify-end">
                 <button 
                   type="button" 
@@ -191,15 +230,29 @@ export default function Profile() {
         <div className="flex-1 text-center md:text-left">
           <h1 className="text-2xl font-bold text-gray-900">{profileData.name}</h1>
           <p className="text-gray-500 mt-1">{profileData.email}</p>
-          <p className="text-gray-600 mt-2">{profileData.bio || 'No bio provided.'}</p>
+          
+          {/* Added Department and Year Display */}
+          {(profileData.department || profileData.year) && (
+             <div className="flex items-center justify-center md:justify-start gap-2 mt-1 text-sm text-indigo-600 font-medium">
+                {profileData.department && <span>{profileData.department}</span>}
+                {profileData.department && profileData.year && <span>•</span>}
+                {profileData.year && <span>Year {profileData.year}</span>}
+             </div>
+          )}
+
+          <p className="text-gray-600 mt-3">{profileData.bio || 'No bio provided.'}</p>
 
           <div className="flex justify-center md:justify-start gap-8 mt-4">
             <div className="text-gray-600 font-medium">
               <span className="font-bold text-gray-900">{profileData._count?.posts || 0}</span> Posts
             </div>
+            {/* Added Followers/Following placeholders if you expand the schema later */}
+             <div className="text-gray-600 font-medium">
+              <span className="font-bold text-gray-900">{profileData._count?.followers || 0}</span> Followers
+            </div>
           </div>
 
-          <div className="flex justify-center md:justify-start gap-4 mt-4">
+          <div className="flex justify-center md:justify-start gap-4 mt-6">
             <button 
               onClick={handleOpenEdit} 
               className="px-4 py-2 bg-indigo-100 text-indigo-700 font-semibold rounded-lg hover:bg-indigo-200 transition"
@@ -239,7 +292,7 @@ export default function Profile() {
   );
 }
 
-// --- Sub Components (Unchanged logic, just cleanup) ---
+// --- Sub Components ---
 
 const ProfilePosts = ({ posts = [] }) => {
   if (posts.length === 0) return <p className="text-center text-gray-500 py-10">No posts yet.</p>;
