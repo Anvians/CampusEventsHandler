@@ -37,7 +37,9 @@ export default function Profile() {
     try {
       setLoading(true);
       const response = await api.get('/api/users/me');
+      console.log('Profile response', response.data)
       setProfileData(response.data);
+
     } catch (err) {
       setError(err.response?.data?.message || 'Failed to fetch profile data');
     } finally {
@@ -295,6 +297,7 @@ export default function Profile() {
 // --- Sub Components ---
 
 const ProfilePosts = ({ posts = [] }) => {
+  console.log('This is post', posts)
   if (posts.length === 0) return <p className="text-center text-gray-500 py-10">No posts yet.</p>;
   return (
     <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
