@@ -28,8 +28,10 @@ export default function Profile() {
   });
   
   const [previewImage, setPreviewImage] = useState(null);
+  
+  useEffect(() => { 
+     console.log('Ankit Sharma');
 
-  useEffect(() => {
     fetchMyProfile();
   }, []);
 
@@ -104,7 +106,8 @@ export default function Profile() {
       setEditLoading(false);
     }
   };
-
+  console.log('profileData', profileData);
+  
   const renderTabContent = () => {
     if (!profileData) return null;
     switch (activeTab) {
