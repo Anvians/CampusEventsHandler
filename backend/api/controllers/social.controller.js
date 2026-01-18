@@ -56,6 +56,8 @@ export const createPost = async (req, res) => {
 };
 
 
+// This feed is not working
+// getting server error
  export const getPostById = async (req, res) => {
   try {
     const postId = req.params.id;
