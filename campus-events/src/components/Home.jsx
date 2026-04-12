@@ -48,27 +48,42 @@ export default function Home() {
   }
 
   return (
-    <div className="max-w-7xl mx-auto px-4 py-8 font-inter">
-      <div className="flex justify-between md:m-5 ml-10 items-center mb-6">
-        <h1 className="text-2xl font-bold text-gray-900">
-          Hey, {user?.name}!
-        </h1>
+    <div className="max-w-7xl mx-auto px-4 py-8 font-inter text-slate-100">
+      <div className="grid gap-6 rounded-[2rem] border border-slate-700/50 bg-slate-950/80 p-6 shadow-[0_30px_80px_-40px_rgba(15,23,42,0.9)] backdrop-blur-xl md:grid-cols-[1.6fr_0.9fr]">
+        <div className="space-y-4">
+          <span className="inline-flex items-center gap-2 rounded-full border border-cyan-400/30 bg-cyan-400/10 px-4 py-2 text-xs font-semibold uppercase tracking-[0.2em] text-cyan-300">
+            Campus Pulse
+          </span>
+          <h1 className="text-3xl font-bold tracking-tight sm:text-4xl">
+            Hey, {user?.name}!
+          </h1>
+          <p className="max-w-2xl text-slate-400">
+            Discover data-driven events, club stories, and social updates with a futuristic campus dashboard built for the next generation.
+          </p>
+        </div>
 
         {(user?.role === 'ORGANIZER' || user?.role === 'ADMIN') && (
-          <button
-            className="px-4 py-2 bg-indigo-600 text-white rounded-lg font-semibold shadow-sm hover:bg-indigo-700 focus:outline-none"
-            onClick={handleCreateEventClick}
-          >
-            Create Event
-          </button>
+          <div className="flex items-center justify-end">
+            <button
+              className="rounded-full border border-cyan-400/30 bg-cyan-400/15 px-6 py-3 text-sm font-semibold text-cyan-100 shadow-[0_0_30px_rgba(56,189,248,0.16)] transition hover:bg-cyan-400/25 hover:shadow-[0_0_40px_rgba(56,189,248,0.3)]"
+              onClick={handleCreateEventClick}
+            >
+              Create Event
+            </button>
+          </div>
         )}
       </div>
 
-      <h2 className="text-xl md:ml-5 ml-10 font-semibold text-gray-700 mb-6">
-        Upcoming Events
-      </h2>
+      <div className="mt-10 space-y-5">
+        <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+          <h2 className="text-xl font-semibold text-slate-100">Upcoming Events</h2>
+          <div className="inline-flex items-center gap-2 rounded-full bg-slate-800/70 px-3 py-1 text-xs font-semibold uppercase tracking-[0.22em] text-slate-300">
+            Live updates
+          </div>
+        </div>
 
-      {content}
+        {content}
+      </div>
     </div>
   );
 }

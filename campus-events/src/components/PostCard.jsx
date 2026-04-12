@@ -8,8 +8,8 @@ const HeartIcon = ({ isLiked, ...props }) => (
     viewBox="0 0 24 24"
     width="24"
     height="24"
-    fill={isLiked ? '#ef4444' : 'none'}
-    stroke={isLiked ? '#ef4444' : '#4a5568'}
+    fill={isLiked ? '#38bdf8' : 'none'}
+    stroke={isLiked ? '#38bdf8' : '#94a3b8'}
     strokeWidth="2"
     strokeLinecap="round"
     strokeLinejoin="round"
@@ -25,7 +25,7 @@ const CommentIcon = (props) => (
     width="24"
     height="24"
     fill="none"
-    stroke="#4a5568"
+    stroke="#94a3b8"
     strokeWidth="2"
     strokeLinecap="round"
     strokeLinejoin="round"
@@ -76,29 +76,28 @@ export default function PostCard({ post, onPostUpdate }) {
   )}&font=inter`;
 
   return (
-    <div className="bg-white rounded-2xl shadow-md overflow-hidden font-inter">
-      {/* Header */}
-      <div className="flex items-center p-3">
+    <div className="futuristic-card overflow-hidden font-inter shadow-[0_30px_90px_rgba(56,189,248,0.12)]">
+      <div className="flex items-center gap-3 px-5 py-4 border-b border-slate-700/60">
         <img
           src={post.user?.profile_photo || userAvatarPlaceholder}
           alt={post.user?.name || 'Unknown User'}
-          className="w-10 h-10 rounded-full object-cover mr-3"
+          className="h-12 w-12 rounded-full object-cover border-2 border-cyan-400/20"
           onError={(e) => (e.target.src = userAvatarPlaceholder)}
         />
         <div>
           {post.user && post.user.id ? (
             <Link
               to={`/profile/${post.user.id}`}
-              className="text-gray-900 font-semibold text-sm"
+              className="text-slate-100 font-semibold hover:text-cyan-300"
             >
               {post.user.name}
             </Link>
           ) : (
-            <span className="text-gray-900 font-semibold text-sm">
+            <span className="text-slate-100 font-semibold">
               {post.user?.name || 'Unknown User'}
             </span>
           )}
-          <p className="text-gray-400 text-xs">
+          <p className="text-slate-500 text-xs mt-1">
             {new Date(post.created_at).toLocaleDateString('en-US', {
               month: 'long',
               day: 'numeric',
@@ -107,51 +106,46 @@ export default function PostCard({ post, onPostUpdate }) {
         </div>
       </div>
 
-      {/* Post Image */}
-      <img
-        src={post.image_url}
-        alt={post.caption || 'Post image'}
-        className="w-full max-h-[700px] object-cover border-t border-b border-gray-100"
-      />
+      <div className="relative overflow-hidden bg-slate-950">
+        <img
+          src={post.image_url}
+          alt={post.caption || 'Post image'}
+          className="w-full max-h-[620px] object-cover"
+        />
+        <div className="absolute inset-x-0 bottom-0 h-24 bg-gradient-to-t from-slate-950/90 to-transparent" />
+      </div>
 
-      {/* Post Content */}
-      <div className="p-3">
-        {/* Actions */}
-        <div className="flex gap-3 mb-2">
-          <button onClick={handleLikeToggle} className="p-1">
-            <HeartIcon isLiked={isLiked} />
-          </button>
-          <button onClick={handleCommentClick} className="p-1">
-            <CommentIcon />
-          </button>
+      <div className="space-y-4 px-5 py-5">
+        <div className="flex items-center justify-between gap-4">
+          <div className="flex items-center gap-4 text-slate-300">
+            <button onClick={handleLikeToggle} className="inline-flex h-11 w-11 items-center justify-center rounded-2xl bg-slate-900/90 text-cyan-300 transition hover:bg-slate-900">
+              <HeartIcon isLiked={isLiked} />
+            </button>
+            <button onClick={handleCommentClick} className="inline-flex h-11 w-11 items-center justify-center rounded-2xl bg-slate-900/90 text-slate-300 transition hover:bg-slate-900">
+              <CommentIcon />
+            </button>
+          </div>
+          <span className="rounded-full bg-slate-900/90 px-3 py-2 text-sm font-semibold text-slate-300">
+            {likeCount} {likeCount === 1 ? 'like' : 'likes'}
+          </span>
         </div>
 
-        {/* Like Count */}
-        <p className="text-gray-900 font-semibold text-sm mb-1">
-          {likeCount} {likeCount === 1 ? 'like' : 'likes'}
-        </p>
-
-        {/* Caption */}
-        <p className="text-gray-900 text-sm leading-5 mb-1">
-          {post.user && post.user.id ? (
-            <Link
-              to={`/profile/${post.user.id}`}
-              className="font-semibold text-gray-900 mr-1"
-            >
-              {post.user.name}
-            </Link>
-          ) : (
-            <span className="font-semibold text-gray-900 mr-1">
-              {post.user?.name || 'Unknown User'}
-            </span>
-          )}
+        <div className="text-slate-100 text-base leading-7">
+          <span className="font-semibold text-slate-100">
+            {post.user && post.user.id ? (
+              <Link to={`/profile/${post.user.id}`} className="hover:text-cyan-300">
+                {post.user.name}
+              </Link>
+            ) : (
+              <span>{post.user?.name || 'Unknown User'}</span>
+            )}
+          </span>{' '}
           {post.caption}
-        </p>
+        </div>
 
-        {/* Comment Count */}
         <Link
           to={`/post/${post.id}`}
-          className="text-gray-400 text-sm block mt-1"
+          className="inline-flex items-center gap-2 text-sm font-semibold text-cyan-300 hover:text-cyan-100"
         >
           View all {commentCount} comments
         </Link>

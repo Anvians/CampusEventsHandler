@@ -156,10 +156,10 @@ export default function Notifications() {
     <div className="relative font-inter" ref={dropdownRef}>
       <button
         onClick={handleToggle}
-        className="relative p-2 rounded-full hover:bg-gray-100 transition-colors focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
+        className="relative p-2 rounded-full hover:bg-slate-800 transition-colors focus:outline-none focus:ring-2 focus:ring-cyan-400 focus:ring-offset-2"
         aria-label="Notifications"
       >
-        <BellIcon className="text-gray-600" />
+        <BellIcon className="text-slate-100" />
         {unreadCount > 0 && (
           <span className="absolute top-0 right-0 w-4 h-4 text-[11px] font-semibold flex items-center justify-center rounded-full bg-red-600 text-white border-2 border-white">
             {unreadCount > 9 ? '9+' : unreadCount}
@@ -168,55 +168,58 @@ export default function Notifications() {
       </button>
 
       {isOpen && (
-        <div className="absolute right-0 mt-4 w-80 sm:w-96 bg-white rounded-xl shadow-xl border border-gray-200 z-50 overflow-hidden">
-          <div className="px-4 py-3 border-b border-gray-100 flex justify-between items-center bg-gray-50/50">
-            <h4 className="text-gray-900 font-semibold text-sm">Notifications</h4>
+        <div className="absolute right-0 mt-4 w-80 sm:w-96 futuristic-card border-slate-700/70 z-50 overflow-hidden">
+          <div className="flex items-center justify-between px-4 py-3 border-b border-slate-700/70 bg-slate-950/60">
+            <h4 className="text-slate-100 font-semibold text-sm">Notifications</h4>
             {unreadCount > 0 && (
               <button 
                 onClick={markAllAsRead}
-                className="text-xs text-indigo-600 hover:text-indigo-800 font-medium transition-colors"
+                className="text-xs text-cyan-300 hover:text-cyan-100 font-medium transition-colors"
               >
                 Mark all read
               </button>
             )}
           </div>
           
-          <div className="max-h-[28rem] overflow-y-auto custom-scrollbar">
+          <div className="max-h-[28rem] overflow-y-auto futuristic-scrollbar">
             {notifications.length === 0 ? (
-              <div className="px-4 py-12 text-center text-gray-500 text-sm">
+              <div className="px-4 py-12 text-center text-slate-400 text-sm">
                 No new notifications
               </div>
             ) : (
               notifications.map((noti) => {
-                const name = noti.originator?.name || "System";
+                const name = noti.originator?.name || 'System';
                 const avatar = noti.originator?.profile_photo || `https://placehold.co/40x40?text=${name.charAt(0).toUpperCase()}`;
-                
+
                 return (
                   <div
-                    key={noti.id || noti._id} // Handle potential MongoDB _id usage
+                    key={noti.id || noti._id}
                     onClick={() => handleNotificationClick(noti)}
-                    className={`flex gap-3 items-start px-4 py-3 cursor-pointer border-b border-gray-100 relative transition-colors ${
-                      !noti.is_read ? 'bg-indigo-50/40 hover:bg-indigo-50/80' : 'hover:bg-gray-50'
+                    className={`flex gap-3 items-start px-4 py-3 cursor-pointer border-b border-slate-700/70 relative transition-colors ${
+                      !noti.is_read ? 'bg-cyan-500/10 hover:bg-cyan-500/15' : 'hover:bg-slate-900/70'
                     }`}
                   >
                     {!noti.is_read && (
-                      <div className="absolute left-1.5 top-1/2 transform -translate-y-1/2 w-1.5 h-1.5 bg-indigo-600 rounded-full" />
+                      <div className="absolute left-1.5 top-1/2 transform -translate-y-1/2 w-1.5 h-1.5 bg-cyan-400 rounded-full" />
                     )}
-                    
+
                     <img
                       src={avatar}
                       alt={name}
-                      className="w-10 h-10 rounded-full object-cover flex-shrink-0 border border-gray-200"
-                      onError={(e) => { e.target.src = "https://placehold.co/40x40?text=?"; }}
+                      className="w-10 h-10 rounded-full object-cover flex-shrink-0 border border-slate-700"
+                      onError={(e) => { e.target.src = 'https://placehold.co/40x40?text=?'; }}
                     />
-                    
+
                     <div className="flex flex-col flex-1 min-w-0">
-                      <p className="text-gray-900 text-sm leading-snug break-words">
+                      <p className="text-slate-100 text-sm leading-snug break-words">
                         <span className="font-semibold">{name}</span> {noti.message}
                       </p>
-                      <span className="text-gray-400 text-xs mt-1">
+                      <span className="text-slate-400 text-xs mt-1">
                         {new Date(noti.created_at).toLocaleDateString(undefined, {
-                            month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit'
+                          month: 'short',
+                          day: 'numeric',
+                          hour: '2-digit',
+                          minute: '2-digit',
                         })}
                       </span>
                     </div>

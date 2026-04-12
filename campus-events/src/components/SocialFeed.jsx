@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { Link } from 'react-router-dom';
 import api from '../utils/api';
 import Spinner from '../components/common/Spinner';
 import ErrorMessage from '../components/common/ErrorMessage';
@@ -33,22 +34,54 @@ export default function SocialFeed() {
     );
   };
 
-  if (loading) return <Spinner />;
-  if (error) return <ErrorMessage message={error} />;
+  if (loading) {
+    return (
+      <div className="flex min-h-[60vh] items-center justify-center px-4">
+        <Spinner />
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="px-4 py-10">
+        <ErrorMessage message={error} />
+      </div>
+    );
+  }
 
   return (
-    <div className="mx-auto max-w-2xl md:px-4 py-8">
+    <div className="mx-auto max-w-5xl px-4 py-10 sm:px-6">
+      <header className="mb-10">
+        <div className="inline-flex items-center gap-2 rounded-full border border-cyan-400/20 bg-slate-950/70 px-4 py-2 text-sm font-semibold text-cyan-300 shadow-[0_0_40px_rgba(34,211,238,0.12)]">
+          <span className="h-2 w-2 rounded-full bg-cyan-300 animate-pulse" />
+          Campus Feed
+        </div>
+        <h1 className="mt-5 text-4xl sm:text-5xl font-extrabold tracking-tight text-slate-100">
+          Stay connected to campus life.
+        </h1>
+        <p className="mt-4 max-w-2xl text-slate-400 text-base sm:text-lg">
+          Discover posts, event highlights, and updates from students across clubs and departments.
+        </p>
+      </header>
+
       {posts.length === 0 ? (
-        <div className="rounded-2xl bg-white p-10 text-center shadow-sm">
-          <h3 className="text-xl font-semibold text-gray-800">
-            Your feed is empty
-          </h3>
-          <p className="mt-2 text-sm text-gray-500">
-            Follow other users or create your first post to see content here.
+        <div className="futuristic-card border border-slate-700/60 p-10 text-center shadow-[0_30px_80px_rgba(56,189,248,0.12)]">
+          <h3 className="text-3xl font-semibold text-slate-100">Your feed is empty</h3>
+          <p className="mt-3 text-slate-400 text-base sm:text-lg">
+            Follow classmates or create your first post to bring the feed to life.
           </p>
+          <div className="mt-8 flex justify-center">
+            <Link
+              to="/create-post"
+              className="inline-flex items-center justify-center gap-2 rounded-full bg-cyan-500 px-6 py-3 text-sm font-semibold text-slate-950 shadow-lg shadow-cyan-500/20 hover:bg-cyan-400 transition-colors"
+            >
+              Create your first post
+            </Link>
+          </div>
         </div>
       ) : (
-        <div className="flex flex-col gap-6">
+        <div className="space-y-6">
           {posts.map((post) => (
             <PostCard
               key={post.id}

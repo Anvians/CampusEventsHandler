@@ -9,6 +9,8 @@ import Navbar from './components/Navbar.jsx';
 import Announcement from './components/Announcement.jsx'
 import Login from "./components/Login.jsx";
 import Signup from "./components/Signup.jsx";
+import ForgotPassword from "./components/ForgotPassword.jsx";
+import ResetPassword from "./components/ResetPassword.jsx";
 import Home from "./components/Home.jsx";
 import Profile from "./components/Profile.jsx";
 import UserProfile from './components/UserProfile.jsx'; 
@@ -29,11 +31,15 @@ import RouteGuard from './components/RouteGuard.jsx';
 
 const MainLayout = ({ children }) => {
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
-      <Navbar />
-      <main style={{ flex: 1, backgroundColor: '#f9fafb', paddingTop: '1px' }}>
-        {children}
-      </main>
+    <div className="min-h-screen bg-slate-950 text-slate-100">
+      <div className="relative overflow-hidden">
+        <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top,_rgba(56,189,248,0.14),transparent_22%),radial-gradient(circle_at_bottom_right,_rgba(192,132,252,0.14),transparent_26%)]" />
+        <div className="pointer-events-none absolute inset-x-0 top-0 h-80 bg-[radial-gradient(circle,_rgba(148,163,184,0.08),transparent_40%)] blur-3xl" />
+        <Navbar />
+        <main className="relative flex-1 py-10 px-4 md:px-8 lg:px-12">
+          {children}
+        </main>
+      </div>
     </div>
   );
 };
@@ -61,6 +67,22 @@ export default function App() {
               <Signup />
             </RouteGuard>
           } 
+        />
+        <Route
+          path="/forgot-password"
+          element={
+            <RouteGuard authRequired={false} redirectPath="/">
+              <ForgotPassword />
+            </RouteGuard>
+          }
+        />
+        <Route
+          path="/reset-password"
+          element={
+            <RouteGuard authRequired={false} redirectPath="/">
+              <ResetPassword />
+            </RouteGuard>
+          }
         />
 
         {/* ---------------------------------- */}

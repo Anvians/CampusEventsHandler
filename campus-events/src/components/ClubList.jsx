@@ -12,30 +12,30 @@ const ClubCard = ({ club }) => {
   )}&font=inter`;
 
   return (
-    <div className="bg-white rounded-xl shadow-md flex items-center p-5 hover:shadow-lg transition-shadow">
+    <div className="futuristic-card flex flex-col gap-4 p-5 hover:shadow-[0_30px_70px_rgba(56,189,248,0.12)] transition-shadow">
       <img
         src={club.club_logo_url || placeholderImage}
         alt={`${club.name} logo`}
-        className="w-20 h-20 rounded-full object-cover mr-5 border-3 border-indigo-100 flex-shrink-0"
+        className="w-24 h-24 rounded-3xl object-cover self-center border border-cyan-400/20"
         onError={(e) => { e.target.src = placeholderImage; }}
       />
       <div className="flex-1 min-w-0">
-        <h3 className="text-lg font-bold text-gray-900 truncate">
-          <Link to={`/club/${club.id}`} className="hover:underline">
+        <h3 className="text-xl font-bold text-slate-100 truncate">
+          <Link to={`/club/${club.id}`} className="hover:text-cyan-300">
             {club.name}
           </Link>
         </h3>
-        <p className="text-sm text-gray-500 truncate mt-1">
+        <p className="text-sm text-slate-400 truncate mt-1">
           Organized by: {club.organizer.name}
         </p>
-        <div className="flex text-sm text-gray-600 gap-2 mt-3">
-          <span>{club._count.members} Members</span>
-          <span>&bull;</span>
-          <span>{club._count.events} Events</span>
+        <div className="flex flex-wrap items-center gap-2 text-sm text-slate-300 mt-4">
+          <span className="futuristic-badge">{club._count.members} Members</span>
+          <span className="text-slate-500">•</span>
+          <span className="futuristic-badge">{club._count.events} Events</span>
         </div>
         <Link
           to={`/club/${club.id}`}
-          className="inline-block mt-3 px-3 py-1 bg-indigo-100 text-indigo-600 rounded-md font-semibold text-sm hover:bg-indigo-200 transition-colors"
+          className="inline-flex mt-4 items-center justify-center futuristic-button-secondary text-slate-100"
         >
           View Club
         </Link>
@@ -90,13 +90,18 @@ export default function ClubList() {
   }
 
   return (
-    <div className="max-w-7xl mx-auto mt-8 px-6 font-inter">
-      <div className="flex justify-between items-center mb-6">
-        <h1 className="text-3xl font-bold text-gray-900">Explore Clubs</h1>
+    <div className="max-w-7xl mx-auto mt-8 px-6 font-inter text-slate-100">
+      <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between mb-8">
+        <div>
+          <h1 className="text-3xl font-bold text-slate-100">Explore Clubs</h1>
+          <p className="text-slate-400 max-w-2xl mt-2">
+            Browse all campus groups, meet organizers, and jump into activities with a bold neon-inspired experience.
+          </p>
+        </div>
         {user?.role === 'ADMIN' && (
           <button
             onClick={handleCreateClubClick}
-            className="px-4 py-2 bg-indigo-600 text-white rounded-lg font-semibold text-sm hover:bg-indigo-700 transition-colors"
+            className="futuristic-button-primary"
           >
             + Create Club
           </button>

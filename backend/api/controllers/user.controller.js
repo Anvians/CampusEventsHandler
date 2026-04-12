@@ -24,13 +24,12 @@ const selectUserFields = {
 };
 
 
-// ---------------- GET MY PROFILE ----------------
-// ---------------- GET MY PROFILE ----------------
+
 export const getMyProfile = async (req, res) => {
   try {
     const userId = Number(req.user.id);
 
-    // 1️⃣ Fetch user profile from Prisma
+    // Fetch user profile from Prisma
     const user = await prisma.user.findUnique({
       where: { id: userId },
       select: { 
@@ -48,16 +47,18 @@ export const getMyProfile = async (req, res) => {
 
     if (!user) return res.status(404).json({ message: "User not found" });
 
-    // 2️⃣ Prepare safe Mongo results
+    // Fetch Posts & Social Stats from Mongo
     let posts = [];
     let followersCount = 0;
     let followingCount = 0;
 
     try {
-      const userIdStr = userId.toString(); // ensure type matches Mongo documents
+      const userIdStr = userId.toString(); 
 
       // Fetch posts
       posts = await Post.find({ user_id: userIdStr }).sort({ created_at: -1 });
+      
+      // Map Mongo documents to the format frontend expects
       posts = posts.map(p => ({
         id: p._id.toString(),
         caption: p.caption,
@@ -72,25 +73,51 @@ export const getMyProfile = async (req, res) => {
       followingCount = await Follow.countDocuments({ follower_id: userIdStr });
     } catch (mongoErr) {
       console.error("Mongo query error in profile:", mongoErr);
-      // leave posts/follow counts empty/0
     }
 
-    //  Fetch club memberships from Prisma (optional)
+    // Fetch Clubs from Prisma
     let clubs = [];
     try {
       clubs = await prisma.clubMember.findMany({
         where: { user_id: userId },
-        select: { club: { select: { id: true, name: true, club_logo_url: true } } }
+        select: { 
+          club: { 
+            select: { id: true, name: true, club_logo_url: true } 
+          } 
+        }
       });
     } catch (clubErr) {
       console.error("Club fetch error:", clubErr);
     }
 
-    // Return combined result
+    // Fetch Events (Registrations) from Prisma -- [THIS WAS MISSING]
+    let events = [];
+    try {
+      events = await prisma.registration.findMany({
+        where: { user_id: userId },
+        include: {
+          event: {
+            include: {
+              club: { // Include club to get the club name for the event card
+                select: { name: true }
+              } 
+            }
+          }
+        },
+        orderBy: {
+          event: { event_datetime: 'desc' } // Optional: Show newest events first
+        }
+      });
+    } catch (eventErr) {
+      console.error("Event fetch error:", eventErr);
+    }
+
+    //  Return Combined Result
     const result = {
       ...user,
-      posts,
-      club_memberships: clubs,
+      posts, // Mongo data
+      club_memberships: clubs, // Prisma data
+      registrations: events,   // Prisma data (Added this)
       _count: {
         posts: posts.length,
         followers: followersCount,
@@ -116,17 +143,13 @@ export const editProfile = async (req, res) => {
       name,
       bio,
       department,
-      // Convert 'year' to Int if it exists, otherwise undefined (Prisma handles undefined gracefully)
       year: year ? parseInt(year, 10) : undefined, 
     };
 
-    // 3. Handle Cloudinary Image Upload
     if (req.file) {
-      // With multer-storage-cloudinary, req.file.path IS the public URL
       updateData.profile_photo = req.file.path; 
     }
 
-    // 4. Perform the Update
     const updatedUser = await prisma.user.update({
       where: { id: userId }, 
       data: updateData,

@@ -46,49 +46,51 @@ const ClubDetail = () => {
 
 
   return (
-    <div className="max-w-5xl  md:h-screen mx-auto px-10 py-8">
+    <div className="max-w-5xl mx-auto px-6 py-10">
       {clubs
         .filter(club => club.id === Number(id))
         .map(club => (
           <div
             key={club.id}
-            className="bg-white rounded-2xl shadow-lg overflow-hidden border border-gray-100"
+            className="futuristic-card overflow-hidden"
           >
 
             {/* Logo */}
-            <div className="h-90 bg-indigo-50 flex items-center justify-center">
+            <div className="relative h-96 overflow-hidden">
               <img
                 src={
                   club.club_logo_url ||
                   `https://placehold.co/200x200/e0e7ff/4338ca?text=${club.name[0]}`
                 }
                 alt={club.name}
-                className="h-full w-full object-cover rounded-t-xl"
+                className="h-full w-full object-cover"
               />
+              <div className="absolute inset-0 bg-gradient-to-t from-slate-950/80 via-slate-950/10 to-transparent" />
             </div>
 
             {/* Content */}
-            <div className="p-6 space-y-4">
-              <div className='flex justify-between'>
-                <h1 className="text-3xl font-bold text-gray-900">
-                  {club.name}
-                </h1>
-                {(club.organizer?.id === user?.id || user?.role==='ADMIN' ) && (
+            <div className="p-8 space-y-6">
+              <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
+                <div>
+                  <h1 className="text-4xl font-bold text-slate-100">
+                    {club.name}
+                  </h1>
+                  <p className="text-slate-400 mt-2">Organized by {club.organizer?.name}</p>
+                </div>
+                {(club.organizer?.id === user?.id || user?.role==='ADMIN') && (
                   <button
-                    className='bg-amber-700 rounded-2xl p-2 text-white'
-                    onClick={() => handleDelete(club.id)} 
+                    className="futuristic-button-secondary text-slate-200"
+                    onClick={() => handleDelete(club.id)}
                   >
                     Delete Club
                   </button>
                 )}
-
               </div>
 
-              <p className="text-gray-600 leading-relaxed">
+              <p className="text-slate-300 leading-relaxed">
                 {club.description}
               </p>
 
-              {/* Organizer */}
               {club.organizer && (
                 <div className="flex items-center gap-3 pt-2">
                   <img
@@ -97,11 +99,11 @@ const ClubDetail = () => {
                       `https://placehold.co/40x40/e0e7ff/4338ca?text=${club.organizer.name[0]}`
                     }
                     alt={club.organizer.name}
-                    className="h-10 w-10 rounded-full object-cover"
+                    className="h-12 w-12 rounded-full object-cover border border-cyan-400/20"
                   />
                   <div>
-                    <p className="text-sm text-gray-500">Organized by</p>
-                    <p className="font-semibold text-gray-800">
+                    <p className="text-sm text-slate-400">Organized by</p>
+                    <p className="font-semibold text-slate-100">
                       {club.organizer.name}
                     </p>
                   </div>
@@ -109,26 +111,26 @@ const ClubDetail = () => {
               )}
 
               {/* Stats */}
-              <div className="grid grid-cols-2 sm:grid-cols-3 gap-4 pt-4">
-                <div className="bg-gray-50 rounded-xl p-4 text-center">
-                  <p className="text-2xl font-bold text-indigo-600">
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 pt-4">
+                <div className="futuristic-card p-5 text-center">
+                  <p className="text-3xl font-bold text-cyan-300">
                     {club._count?.events ?? 0}
                   </p>
-                  <p className="text-sm text-gray-500">Events</p>
+                  <p className="text-sm text-slate-400">Events</p>
                 </div>
 
-                <div className="bg-gray-50 rounded-xl p-4 text-center">
-                  <p className="text-2xl font-bold text-indigo-600">
+                <div className="futuristic-card p-5 text-center">
+                  <p className="text-3xl font-bold text-cyan-300">
                     {club._count?.members ?? 0}
                   </p>
-                  <p className="text-sm text-gray-500">Members</p>
+                  <p className="text-sm text-slate-400">Members</p>
                 </div>
 
-                <div className="bg-gray-50 rounded-xl p-4 text-center">
-                  <p className="text-sm font-semibold text-gray-700">
+                <div className="futuristic-card p-5 text-center">
+                  <p className="text-sm font-semibold text-slate-100">
                     {new Date(club.created_at).toLocaleDateString()}
                   </p>
-                  <p className="text-sm text-gray-500">Created On</p>
+                  <p className="text-sm text-slate-400">Created On</p>
                 </div>
               </div>
             </div>

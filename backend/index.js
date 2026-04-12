@@ -32,7 +32,8 @@ const allowedOrigins = [
   "http://127.0.0.1:5173",
   process.env.FRONTEND_URL,     // https://campus-events-handler.vercel.app
   // Add the render URL just in case you test backend-to-backend
-  "https://campuseventshandler.onrender.com" 
+  "https://campuseventshandler.onrender.com",
+
 ].filter(Boolean);
 app.use(cors({
   origin: allowedOrigins,
@@ -84,10 +85,10 @@ const server = http.createServer(app);
 // Initialize socket.io on the server
 const io = new Server(server, {
   cors: {
-    origin:  allowedOrigins,
+    origin: allowedOrigins,
     credentials: true,
-    methods: ["GET", "POST"]
-  }
+    methods: ["GET", "POST", "OPTIONS"],
+  },
 });
 
 // Socket.io connection handling
@@ -108,7 +109,35 @@ io.on('connection', (socket) => {
 // Export app, server, and io for other modules
 export { app, server, io };
 
-// Start the server
-server.listen(PORT, () => {
-  console.log(`Server + Socket.IO running on PORT: ${PORT}`);
-});
+const startServer = async () => {
+  if (process.env.NODE_ENV === 'production') {
+    app.set('trust proxy', 1);
+  }
+
+  try {
+    if (process.env.MONGO_URL) {
+      await connectMongo();
+    } else {
+      console.warn('MONGO_URL is not configured. Social and notification features may be limited.');
+    }
+
+    if (process.env.REDIS_URL) {
+      redisClient.connect().catch((err) => {
+        console.error('Redis connection failed; continuing without Redis caching:', err.message || err);
+      });
+    } else {
+      console.warn('REDIS_URL is not configured. Caching and realtime notifications are disabled.');
+    }
+
+    await prisma.$connect();
+
+    server.listen(PORT, () => {
+      console.log(`Server + Socket.IO running on PORT: ${PORT}`);
+    });
+  } catch (error) {
+    console.error('Startup failed:', error);
+    process.exit(1);
+  }
+};
+
+startServer();

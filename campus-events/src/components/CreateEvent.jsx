@@ -17,7 +17,7 @@ export default function CreateEvent() {
     date: '',
     time: '',
     venue: '',
-    banner_url: '', 
+    banner_url: '',
     price: 0,
     registration_limit: 50,
     is_team_event: false,
@@ -72,7 +72,7 @@ export default function CreateEvent() {
 
     try {
       const event_datetime = new Date(`${formData.date}T${formData.time}:00`).toISOString();
-      
+
       const dataToSubmit = {
         title: formData.title,
         description: formData.description,
@@ -87,7 +87,7 @@ export default function CreateEvent() {
         min_team_size: parseInt(formData.min_team_size, 10),
         max_team_size: parseInt(formData.max_team_size, 10),
       };
-      
+
       const response = await api.post('/api/events', dataToSubmit);
       navigate(`/event/${response.data.event.id}`);
     } catch (err) {
@@ -97,136 +97,228 @@ export default function CreateEvent() {
     }
   };
 
-  if (loadingClubs) return <Spinner />;
+  if (loadingClubs) {
+    return (
+      <div className="flex min-h-[60vh] items-center justify-center px-4">
+        <Spinner />
+      </div>
+    );
+  }
 
   return (
-    <div className="max-w-3xl mx-auto mt-12 p-10 bg-white rounded-2xl shadow-lg font-inter">
-      <h1 className="text-2xl font-bold text-gray-900 text-center mb-6">Create a New Event</h1>
-      <form className="flex flex-col gap-6" onSubmit={handleSubmit}>
-        {myClubs.length === 0 ? (
-          <ErrorMessage message={submitError || "No clubs available to create an event."} />
-        ) : (
-          <>
-            {/* Title & Club */}
-            <div className="flex flex-wrap gap-6">
-              <div className="flex-1 min-w-[250px]">
-                <label htmlFor="title" className="block text-sm font-semibold text-gray-600 mb-2">Event Title</label>
-                <input type="text" name="title" id="title" required
-                  value={formData.title}
-                  onChange={handleChange}
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg bg-gray-50 text-gray-800 text-base focus:outline-none focus:ring-2 focus:ring-indigo-400" />
-              </div>
-              <div className="flex-1 min-w-[250px]">
-                <label htmlFor="club_id" className="block text-sm font-semibold text-gray-600 mb-2">Hosting Club</label>
-                <select name="club_id" id="club_id" required
-                  value={formData.club_id}
-                  onChange={handleChange}
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg bg-gray-50 text-gray-800 text-base focus:outline-none focus:ring-2 focus:ring-indigo-400">
-                  {myClubs.map(club => (
-                    <option key={club.id} value={club.id}>{club.name}</option>
-                  ))}
-                </select>
-              </div>
-            </div>
+    <div className="mx-auto max-w-5xl px-4 py-10 sm:px-6">
+      <div className="futuristic-card border border-slate-700/60 shadow-[0_35px_90px_rgba(14,165,233,0.12)] p-8 sm:p-10">
+        <div className="mb-8 text-center">
+          <p className="text-sm font-semibold uppercase tracking-[0.35em] text-cyan-300">Event Builder</p>
+          <h1 className="mt-4 text-4xl font-extrabold text-slate-100">Create your next campus experience</h1>
+          <p className="mt-3 text-slate-400">Set up a new event with location, pricing, categories, and team options.</p>
+        </div>
 
-            {/* Description */}
-            <div>
-              <label htmlFor="description" className="block text-sm font-semibold text-gray-600 mb-2">Description</label>
-              <textarea name="description" id="description" rows="4"
-                value={formData.description}
-                onChange={handleChange}
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg bg-gray-50 text-gray-800 text-base resize-vertical focus:outline-none focus:ring-2 focus:ring-indigo-400"></textarea>
-            </div>
-
-            {/* Date & Time */}
-            <div className="flex flex-wrap gap-6">
-              <div className="flex-1 min-w-[250px]">
-                <label htmlFor="date" className="block text-sm font-semibold text-gray-600 mb-2">Event Date</label>
-                <input type="date" name="date" id="date" required
-                  value={formData.date} onChange={handleChange}
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg bg-gray-50 text-gray-800 text-base focus:outline-none focus:ring-2 focus:ring-indigo-400" />
-              </div>
-              <div className="flex-1 min-w-[250px]">
-                <label htmlFor="time" className="block text-sm font-semibold text-gray-600 mb-2">Event Time</label>
-                <input type="time" name="time" id="time" required
-                  value={formData.time} onChange={handleChange}
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg bg-gray-50 text-gray-800 text-base focus:outline-none focus:ring-2 focus:ring-indigo-400" />
-              </div>
-            </div>
-
-            {/* Venue & Category */}
-            <div className="flex flex-wrap gap-6">
-              <div className="flex-1 min-w-[250px]">
-                <label htmlFor="venue" className="block text-sm font-semibold text-gray-600 mb-2">Venue</label>
-                <input type="text" name="venue" id="venue" placeholder="e.g., 'Main Auditorium' or 'Online'" required
-                  value={formData.venue} onChange={handleChange}
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg bg-gray-50 text-gray-800 text-base focus:outline-none focus:ring-2 focus:ring-indigo-400" />
-              </div>
-              <div className="flex-1 min-w-[250px]">
-                <label htmlFor="category" className="block text-sm font-semibold text-gray-600 mb-2">Category</label>
-                <input type="text" name="category" id="category" placeholder="e.g., 'Tech' or 'Music'"
-                  value={formData.category} onChange={handleChange}
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg bg-gray-50 text-gray-800 text-base focus:outline-none focus:ring-2 focus:ring-indigo-400" />
-              </div>
-            </div>
-
-            {/* Banner URL */}
-            <div>
-              <label htmlFor="banner_url" className="block text-sm font-semibold text-gray-600 mb-2">Banner Image URL (Optional)</label>
-              <input type="text" name="banner_url" id="banner_url" placeholder="https://example.com/image.png"
-                value={formData.banner_url} onChange={handleChange}
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg bg-gray-50 text-gray-800 text-base focus:outline-none focus:ring-2 focus:ring-indigo-400" />
-            </div>
-
-            {/* Price & Registration Limit */}
-            <div className="flex flex-wrap gap-6">
-              <div className="flex-1 min-w-[250px]">
-                <label htmlFor="price" className="block text-sm font-semibold text-gray-600 mb-2">Price (0 for free)</label>
-                <input type="number" name="price" id="price" min="0" step="0.01" required
-                  value={formData.price} onChange={handleChange}
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg bg-gray-50 text-gray-800 text-base focus:outline-none focus:ring-2 focus:ring-indigo-400" />
-              </div>
-              <div className="flex-1 min-w-[250px]">
-                <label htmlFor="registration_limit" className="block text-sm font-semibold text-gray-600 mb-2">Registration Limit</label>
-                <input type="number" name="registration_limit" id="registration_limit" min="1" required
-                  value={formData.registration_limit} onChange={handleChange}
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg bg-gray-50 text-gray-800 text-base focus:outline-none focus:ring-2 focus:ring-indigo-400" />
-              </div>
-            </div>
-
-            {/* Team Event */}
-            <div className="flex items-center gap-3">
-              <input type="checkbox" name="is_team_event" id="is_team_event"
-                checked={formData.is_team_event} onChange={handleChange}
-                className="w-5 h-5" />
-              <label htmlFor="is_team_event" className="text-sm font-semibold text-gray-600">This is a team event</label>
-            </div>
-
-            {formData.is_team_event && (
-              <div className="flex flex-wrap gap-6">
-                <div className="flex-1 min-w-[250px]">
-                  <label htmlFor="min_team_size" className="block text-sm font-semibold text-gray-600 mb-2">Min. Team Size</label>
-                  <input type="number" name="min_team_size" id="min_team_size" min="1"
-                    value={formData.min_team_size} onChange={handleChange}
-                    className="w-full px-4 py-3 border border-gray-300 rounded-lg bg-gray-50 text-gray-800 text-base focus:outline-none focus:ring-2 focus:ring-indigo-400" />
+        <form className="space-y-8" onSubmit={handleSubmit}>
+          {myClubs.length === 0 ? (
+            <ErrorMessage message={submitError || 'No clubs available to create an event.'} />
+          ) : (
+            <>
+              <div className="grid gap-6 lg:grid-cols-2">
+                <div className="space-y-4">
+                  <label htmlFor="title" className="block text-sm font-semibold text-slate-300">Event Title</label>
+                  <input
+                    id="title"
+                    name="title"
+                    required
+                    value={formData.title}
+                    onChange={handleChange}
+                    className="w-full rounded-3xl border border-slate-700 bg-slate-950/80 px-4 py-3 text-slate-100 focus:border-cyan-400 focus:outline-none focus:ring-2 focus:ring-cyan-400/20"
+                  />
                 </div>
-                <div className="flex-1 min-w-[250px]">
-                  <label htmlFor="max_team_size" className="block text-sm font-semibold text-gray-600 mb-2">Max. Team Size</label>
-                  <input type="number" name="max_team_size" id="max_team_size" min={formData.min_team_size}
-                    value={formData.max_team_size} onChange={handleChange}
-                    className="w-full px-4 py-3 border border-gray-300 rounded-lg bg-gray-50 text-gray-800 text-base focus:outline-none focus:ring-2 focus:ring-indigo-400" />
+                <div className="space-y-4">
+                  <label htmlFor="club_id" className="block text-sm font-semibold text-slate-300">Hosting Club</label>
+                  <select
+                    id="club_id"
+                    name="club_id"
+                    required
+                    value={formData.club_id}
+                    onChange={handleChange}
+                    className="w-full rounded-3xl border border-slate-700 bg-slate-950/80 px-4 py-3 text-slate-100 focus:border-cyan-400 focus:outline-none focus:ring-2 focus:ring-cyan-400/20"
+                  >
+                    {myClubs.map((club) => (
+                      <option key={club.id} value={club.id}>
+                        {club.name}
+                      </option>
+                    ))}
+                  </select>
                 </div>
               </div>
-            )}
 
-            {submitError && !loadingClubs && <ErrorMessage message={submitError} />}
-            <button type="submit" disabled={isSubmitting || myClubs.length === 0}
-              className="mt-4 px-6 py-3 bg-indigo-600 text-white font-bold rounded-xl text-base hover:bg-indigo-700 transition-colors disabled:opacity-50">
-              {isSubmitting ? 'Creating Event...' : 'Create Event'}
-            </button>
-          </>
-        )}
-      </form>
+              <div className="space-y-4">
+                <label htmlFor="description" className="block text-sm font-semibold text-slate-300">Description</label>
+                <textarea
+                  id="description"
+                  name="description"
+                  rows="5"
+                  value={formData.description}
+                  onChange={handleChange}
+                  className="w-full rounded-3xl border border-slate-700 bg-slate-950/80 px-4 py-4 text-slate-100 placeholder:text-slate-500 focus:border-cyan-400 focus:outline-none focus:ring-2 focus:ring-cyan-400/20"
+                />
+              </div>
+
+              <div className="grid gap-6 lg:grid-cols-2">
+                <div className="space-y-4">
+                  <label htmlFor="date" className="block text-sm font-semibold text-slate-300">Event Date</label>
+                  <input
+                    id="date"
+                    name="date"
+                    type="date"
+                    required
+                    value={formData.date}
+                    onChange={handleChange}
+                    className="w-full rounded-3xl border border-slate-700 bg-slate-950/80 px-4 py-3 text-slate-100 focus:border-cyan-400 focus:outline-none focus:ring-2 focus:ring-cyan-400/20"
+                  />
+                </div>
+                <div className="space-y-4">
+                  <label htmlFor="time" className="block text-sm font-semibold text-slate-300">Event Time</label>
+                  <input
+                    id="time"
+                    name="time"
+                    type="time"
+                    required
+                    value={formData.time}
+                    onChange={handleChange}
+                    className="w-full rounded-3xl border border-slate-700 bg-slate-950/80 px-4 py-3 text-slate-100 focus:border-cyan-400 focus:outline-none focus:ring-2 focus:ring-cyan-400/20"
+                  />
+                </div>
+              </div>
+
+              <div className="grid gap-6 lg:grid-cols-2">
+                <div className="space-y-4">
+                  <label htmlFor="venue" className="block text-sm font-semibold text-slate-300">Venue</label>
+                  <input
+                    id="venue"
+                    name="venue"
+                    type="text"
+                    placeholder="Main Auditorium or Online"
+                    required
+                    value={formData.venue}
+                    onChange={handleChange}
+                    className="w-full rounded-3xl border border-slate-700 bg-slate-950/80 px-4 py-3 text-slate-100 focus:border-cyan-400 focus:outline-none focus:ring-2 focus:ring-cyan-400/20"
+                  />
+                </div>
+                <div className="space-y-4">
+                  <label htmlFor="category" className="block text-sm font-semibold text-slate-300">Category</label>
+                  <input
+                    id="category"
+                    name="category"
+                    type="text"
+                    placeholder="Tech, Music, Wellness..."
+                    value={formData.category}
+                    onChange={handleChange}
+                    className="w-full rounded-3xl border border-slate-700 bg-slate-950/80 px-4 py-3 text-slate-100 focus:border-cyan-400 focus:outline-none focus:ring-2 focus:ring-cyan-400/20"
+                  />
+                </div>
+              </div>
+
+              <div className="space-y-4">
+                <label htmlFor="banner_url" className="block text-sm font-semibold text-slate-300">Banner Image URL</label>
+                <input
+                  id="banner_url"
+                  name="banner_url"
+                  type="url"
+                  placeholder="https://example.com/banner.jpg"
+                  value={formData.banner_url}
+                  onChange={handleChange}
+                  className="w-full rounded-3xl border border-slate-700 bg-slate-950/80 px-4 py-3 text-slate-100 focus:border-cyan-400 focus:outline-none focus:ring-2 focus:ring-cyan-400/20"
+                />
+              </div>
+
+              <div className="grid gap-6 lg:grid-cols-2">
+                <div className="space-y-4">
+                  <label htmlFor="price" className="block text-sm font-semibold text-slate-300">Price</label>
+                  <input
+                    id="price"
+                    name="price"
+                    type="number"
+                    min="0"
+                    step="0.01"
+                    required
+                    value={formData.price}
+                    onChange={handleChange}
+                    className="w-full rounded-3xl border border-slate-700 bg-slate-950/80 px-4 py-3 text-slate-100 focus:border-cyan-400 focus:outline-none focus:ring-2 focus:ring-cyan-400/20"
+                  />
+                </div>
+                <div className="space-y-4">
+                  <label htmlFor="registration_limit" className="block text-sm font-semibold text-slate-300">Registration Limit</label>
+                  <input
+                    id="registration_limit"
+                    name="registration_limit"
+                    type="number"
+                    min="1"
+                    required
+                    value={formData.registration_limit}
+                    onChange={handleChange}
+                    className="w-full rounded-3xl border border-slate-700 bg-slate-950/80 px-4 py-3 text-slate-100 focus:border-cyan-400 focus:outline-none focus:ring-2 focus:ring-cyan-400/20"
+                  />
+                </div>
+              </div>
+
+              <div className="rounded-3xl border border-slate-700 bg-slate-950/90 p-6">
+                <div className="flex items-center gap-3">
+                  <input
+                    id="is_team_event"
+                    name="is_team_event"
+                    type="checkbox"
+                    checked={formData.is_team_event}
+                    onChange={handleChange}
+                    className="h-5 w-5 rounded border-slate-600 bg-slate-800 text-cyan-400 focus:ring-cyan-400"
+                  />
+                  <label htmlFor="is_team_event" className="text-sm font-semibold text-slate-200">This is a team event</label>
+                </div>
+
+                {formData.is_team_event && (
+                  <div className="mt-6 grid gap-6 lg:grid-cols-2">
+                    <div className="space-y-4">
+                      <label htmlFor="min_team_size" className="block text-sm font-semibold text-slate-300">Min. Team Size</label>
+                      <input
+                        id="min_team_size"
+                        name="min_team_size"
+                        type="number"
+                        min="1"
+                        value={formData.min_team_size}
+                        onChange={handleChange}
+                        className="w-full rounded-3xl border border-slate-700 bg-slate-950/80 px-4 py-3 text-slate-100 focus:border-cyan-400 focus:outline-none focus:ring-2 focus:ring-cyan-400/20"
+                      />
+                    </div>
+                    <div className="space-y-4">
+                      <label htmlFor="max_team_size" className="block text-sm font-semibold text-slate-300">Max. Team Size</label>
+                      <input
+                        id="max_team_size"
+                        name="max_team_size"
+                        type="number"
+                        min={formData.min_team_size}
+                        value={formData.max_team_size}
+                        onChange={handleChange}
+                        className="w-full rounded-3xl border border-slate-700 bg-slate-950/80 px-4 py-3 text-slate-100 focus:border-cyan-400 focus:outline-none focus:ring-2 focus:ring-cyan-400/20"
+                      />
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              {submitError && <ErrorMessage message={submitError} />}
+
+              <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+                <p className="text-sm text-slate-400">Once created, your event will appear in the campus events list.</p>
+                <button
+                  type="submit"
+                  disabled={isSubmitting || myClubs.length === 0}
+                  className="inline-flex items-center justify-center rounded-full bg-cyan-500 px-8 py-3 text-sm font-semibold text-slate-950 shadow-lg shadow-cyan-500/20 transition hover:bg-cyan-400 disabled:opacity-50"
+                >
+                  {isSubmitting ? 'Creating Event...' : 'Create Event'}
+                </button>
+              </div>
+            </>
+          )}
+        </form>
+      </div>
     </div>
   );
 }
