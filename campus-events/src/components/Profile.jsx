@@ -23,8 +23,10 @@ export default function Profile() {
     profile_photo: null,
   });
   const [previewImage, setPreviewImage] = useState(null);
+  
+  useEffect(() => { 
+     console.log('Ankit Sharma');
 
-  useEffect(() => {
     fetchMyProfile();
   }, []);
 
@@ -32,7 +34,9 @@ export default function Profile() {
     try {
       setLoading(true);
       const response = await api.get('/api/users/me');
+      console.log('Profile response', response.data)
       setProfileData(response.data);
+
     } catch (err) {
       setError(err.response?.data?.message || 'Failed to fetch profile data');
     } finally {
@@ -91,7 +95,8 @@ export default function Profile() {
       setEditLoading(false);
     }
   };
-
+  console.log('profileData', profileData);
+  
   const renderTabContent = () => {
     if (!profileData) return null;
     switch (activeTab) {
@@ -370,9 +375,14 @@ const Badge = ({ label, value }) => (
 );
 
 const ProfilePosts = ({ posts = [] }) => {
+<<<<<<< HEAD
   if (posts.length === 0)
     return <p className="text-center text-slate-400 py-10">No posts yet. Share your first moment with campus.</p>;
 
+=======
+  console.log('This is post', posts)
+  if (posts.length === 0) return <p className="text-center text-gray-500 py-10">No posts yet.</p>;
+>>>>>>> 6b3dfcea78627c01a1b1516f7e3c83e8f3dec867
   return (
     <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
       {posts.map((post) => (

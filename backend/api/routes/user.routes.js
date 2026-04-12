@@ -16,8 +16,8 @@ const router = express.Router();
 //  GET /api/users/me
 router.get('/me', verifyAuth, getMyProfile);
 
-router.put('/me', verifyAuth, upload.single('profile_photo'), editProfile);//  GET /api/users/notifications
-router.get('/notifications', verifyAuth, getMyNotifications);
+router.put('/me', verifyAuth, upload.single('profile_photo'), editProfile);
+router.get('/notifications', verifyAuth, getMyNotifications);//  GET /api/users/notifications
 
 //  PUT /api/users/notifications/read
 router.put('/notifications/read', verifyAuth, markNotificationsAsRead);
